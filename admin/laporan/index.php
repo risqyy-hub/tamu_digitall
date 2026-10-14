@@ -64,7 +64,7 @@ require __DIR__ . '/../../includes/header.php';
 ?>
 
 <!-- ============ Bagian TIDAK dicetak ============ -->
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 no-print">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 no-print">
   <div>
     <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-file-earmark-bar-graph me-2"></i>Laporan Kunjungan</h1>
     <small class="text-muted">Filter, cetak (Save as PDF), atau unduh CSV</small>
@@ -158,6 +158,7 @@ require __DIR__ . '/../../includes/header.php';
           <th>Tamu</th>
           <th>Instansi</th>
           <th>Tujuan</th>
+          <th>Hasil Kunjungan</th>
           <th>Pegawai</th>
           <th>Masuk</th>
           <th>Keluar</th>
@@ -169,7 +170,7 @@ require __DIR__ . '/../../includes/header.php';
       </thead>
       <tbody>
       <?php if (!$rows): ?>
-        <tr><td colspan="13">
+        <tr><td colspan="14">
           <div class="empty-state"><i class="bi bi-inbox"></i>Tidak ada data kunjungan pada periode ini.</div>
         </td></tr>
       <?php endif; ?>
@@ -181,6 +182,7 @@ require __DIR__ . '/../../includes/header.php';
           <td class="small"><?= e($r['nama_tamu']) ?></td>
           <td class="small"><?= e($r['nama_perusahaan'] ?: ($r['instansi'] ?: '-')) ?></td>
           <td class="small"><?= e($r['tujuan']) ?></td>
+          <td class="small hasil-cell"><?= cell_hasil_kunjungan($r['hasil_kunjungan'] ?? null) ?></td>
           <td class="small"><?= e($r['pegawai_ditemui']) ?></td>
           <td class="small"><?= e(format_waktu($r['jam_masuk'])) ?></td>
           <td class="small"><?= e(format_waktu($r['jam_keluar'])) ?></td>

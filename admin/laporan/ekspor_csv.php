@@ -30,7 +30,7 @@ $rows = $st->fetchAll();
 
 $header = [
     'No. Kunjungan', 'Tanggal', 'Kode Tamu', 'Nama Tamu', 'Jenis Identitas', 'No. Identitas',
-    'Instansi/Mitra', 'Tujuan', 'Pegawai Ditemui', 'Keperluan',
+    'Instansi/Mitra', 'Tujuan', 'Hasil Kunjungan', 'Pegawai Ditemui', 'Keperluan',
     'Jam Masuk', 'Jam Keluar', 'Durasi (menit)', 'Status',
     'Jumlah Jaminan', 'Jaminan Aktif', 'Petugas Check-in', 'Petugas Check-out', 'QR Digunakan',
 ];
@@ -49,6 +49,7 @@ foreach ($rows as $r) {
         $r['no_identitas'],
         $r['nama_perusahaan'] ?: ($r['instansi'] ?: ''),
         $r['tujuan'],
+        $r['hasil_kunjungan'] ?? '',
         $r['pegawai_ditemui'],
         $r['keperluan'],
         format_tgl_waktu($r['jam_masuk']),

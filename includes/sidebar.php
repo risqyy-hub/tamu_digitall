@@ -52,9 +52,9 @@ if ($role === 'admin') {
     ];
 }
 ?>
-<aside class="sidebar offcanvas-lg offcanvas-start bg-white border-end" tabindex="-1" id="sidebarMenu">
-  <div class="offcanvas-header border-bottom d-lg-none">
-    <span class="fw-bold text-navy"><i class="bi bi-journal-bookmark-fill me-1"></i>Menu</span>
+<aside class="sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="sidebarMenu">
+  <div class="offcanvas-header d-lg-none">
+    <span class="fw-bold"><i class="bi bi-journal-bookmark-fill me-1"></i>Menu</span>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu"
             aria-label="Tutup menu"></button>
   </div>

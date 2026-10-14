@@ -1,7 +1,7 @@
 <?php
 /**
  * actions/kunjungan_process.php
- * Check-in kunjungan (alur QR & manual).
+ * Check-in kunjungan (alur QR & manual) & penyimpanan hasil kunjungan.
  * Identitas tamu SELALU diambil ulang dari database - tidak pernah dipercaya dari browser.
  */
 require_once __DIR__ . '/../includes/functions.php';
@@ -13,16 +13,75 @@ verify_csrf();
 $area = is_admin() ? 'admin' : 'petugas';
 $base = $area . '/kunjungan';
 
-if (req_str('action') !== 'checkin') {
+$action = req_str('action');
+
+/* ============================================================
+ *  SIMPAN / PERBARUI HASIL KUNJUNGAN
+ *  Satu-satunya kolom yang disentuh: visits.hasil_kunjungan.
+ *  Boleh kosong (kunjungan berlangsung / belum ada catatan).
+ * ============================================================ */
+if ($action === 'simpan_hasil') {
+    $visitId = req_int('id');
+    $hasil    = req_str('hasil_kunjungan');
+
+    if ($visitId <= 0) {
+        flash_set('warning', 'Kunjungan tidak valid.');
+        redirect($base . '/index.php');
+    }
+    if (mb_strlen($hasil) > HASIL_KUNJUNGAN_MAX) {
+        flash_set('warning', 'Hasil kunjungan terlalu panjang (maksimal '
+            . HASIL_KUNJUNGAN_MAX . ' karakter).');
+        redirect($base . '/detail.php?id=' . $visitId);
+    }
+
+    $pdo = db();
+
+    try {
+        $st = $pdo->prepare('SELECT id, kode_kunjungan FROM visits WHERE id = ?');
+        $st->execute([$visitId]);
+        $visit = $st->fetch();
+
+        if (!$visit) {
+            throw new RuntimeException('Kunjungan tidak ditemukan.');
+        }
+
+        // Prepared statement PDO - tidak ada data yang digabung ke SQL.
+        $st = $pdo->prepare('UPDATE visits SET hasil_kunjungan = ? WHERE id = ?');
+        $st->execute([$hasil !== '' ? $hasil : null, $visitId]);
+    } catch (Throwable $e) {
+        if ($e instanceof RuntimeException) {
+            flash_set('danger', $e->getMessage());
+        } else {
+            error_log('[HASIL_KUNJUNGAN] ' . $e->getMessage());
+            flash_set('danger', 'Terjadi kesalahan saat menyimpan hasil kunjungan. Silakan coba lagi.');
+        }
+        redirect($base . '/detail.php?id=' . $visitId);
+    }
+
+    log_aktivitas('Perbarui hasil kunjungan ' . $visit['kode_kunjungan']);
+    flash_set('success', $hasil !== ''
+        ? 'Hasil kunjungan ' . $visit['kode_kunjungan'] . ' berhasil disimpan.'
+        : 'Hasil kunjungan ' . $visit['kode_kunjungan'] . ' dikosongkan.');
+    redirect($base . '/detail.php?id=' . $visitId);
+}
+
+if ($action !== 'checkin') {
     flash_set('danger', 'Aksi tidak dikenal.');
     redirect($base . '/index.php');
 }
 
-$tujuan      = req_str('tujuan');
-$pegawai     = req_str('pegawai_ditemui');
-$keperluan   = req_str('keperluan');
-$mode        = req_str('mode', 'manual');
-$token       = req_str('token');
+$tujuan        = req_str('tujuan');
+$pegawai       = req_str('pegawai_ditemui');
+$keperluan     = req_str('keperluan');
+$hasilKunjungan = req_str('hasil_kunjungan'); // opsional - boleh kosong saat check-in
+$mode          = req_str('mode', 'manual');
+$token         = req_str('token');
+
+if (mb_strlen($hasilKunjungan) > HASIL_KUNJUNGAN_MAX) {
+    flash_set('warning', 'Hasil kunjungan terlalu panjang (maksimal '
+        . HASIL_KUNJUNGAN_MAX . ' karakter).');
+    redirect($base . '/tambah.php' . ($token !== '' ? '?token=' . urlencode($token) : ''));
+}
 
 if ($tujuan === '' || mb_strlen($tujuan) < 3) {
     flash_set('warning', 'Tujuan kunjungan wajib diisi (minimal 3 karakter).');
@@ -138,12 +197,12 @@ try {
     $st = $pdo->prepare(
         "INSERT INTO visits
             (kode_kunjungan, visitor_id, registered_visitor_id, mitra_id, qr_id, instansi,
-             tujuan, pegawai_ditemui, keperluan, jam_masuk, status, petugas_masuk_id)
-         VALUES (?,?,?,?,?,?,?,?,?,NOW(),'berlangsung',?)"
+             tujuan, pegawai_ditemui, keperluan, hasil_kunjungan, jam_masuk, status, petugas_masuk_id)
+         VALUES (?,?,?,?,?,?,?,?,?,?,NOW(),'berlangsung',?)"
     );
     $st->execute([
         $kode, $visitorId, $regId, $mitraId, $qrId, $instansi,
-        $tujuan, $pegawai, $keperluan ?: null, current_user_id(),
+        $tujuan, $pegawai, $keperluan ?: null, $hasilKunjungan ?: null, current_user_id(),
     ]);
     $visitId = (int) $pdo->lastInsertId();
 

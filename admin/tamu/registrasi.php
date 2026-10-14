@@ -50,7 +50,7 @@ $active_menu = 'registrasi';
 require __DIR__ . '/../../includes/header.php';
 ?>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <div>
     <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-person-check me-2"></i>Tamu Terdaftar</h1>
     <small class="text-muted"><?= $total ?> registrasi &middot; tamu terdaftar dapat memiliki QR Code check-in</small>
@@ -149,7 +149,7 @@ require __DIR__ . '/../../includes/header.php';
                   </button>
                 </form>
                 <a href="<?= e(url('admin/qr/tambah.php?reg_id=' . (int) $r['id'])) ?>"
-                   class="btn btn-outline-navy btn-sm" title="Terbitkan QR">
+                   class="btn btn-outline-navy btn-sm btn-icon" title="Terbitkan QR">
                   <i class="bi bi-qr-code"></i>
                 </a>
                 <form method="post" action="<?= e(url('actions/registrasi_process.php')) ?>" class="d-inline"

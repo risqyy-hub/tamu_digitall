@@ -18,6 +18,10 @@ $page_title = 'Login';
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Login &middot; <?= e(setting('nama_instansi', APP_NAME)) ?></title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap/css/bootstrap.min.css')) ?>">
 <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap-icons/css/bootstrap-icons.min.css')) ?>">
 <link rel="stylesheet" href="<?= e(asset('css/style.css')) ?>">
@@ -27,12 +31,11 @@ $page_title = 'Login';
 <div class="card auth-card">
   <div class="card-body p-4 p-md-5">
     <div class="text-center mb-4">
-      <div class="mx-auto mb-3 d-flex align-items-center justify-content-center bg-navy text-white"
-           style="width:64px;height:64px;border-radius:1rem">
+      <div class="auth-logo mx-auto mb-3">
         <i class="bi bi-journal-bookmark-fill fs-2"></i>
       </div>
       <h1 class="h5 fw-bold text-navy mb-1">Buku Tamu Digital</h1>
-      <p class="text-muted small mb-0"><?= e(setting('nama_instansi', APP_NAME)) ?></p>
+      <p class="text-muted small mb-1"><?= e(setting('nama_instansi', APP_NAME)) ?></p>
       <p class="text-muted small">Silakan login untuk melanjutkan</p>
     </div>
 
@@ -67,7 +70,7 @@ $page_title = 'Login';
         </div>
       </div>
 
-      <button type="submit" class="btn btn-navy w-100 py-2 fw-semibold">
+      <button type="submit" class="btn btn-cream w-100 py-2">
         <i class="bi bi-box-arrow-in-right me-1"></i>Masuk
       </button>
     </form>

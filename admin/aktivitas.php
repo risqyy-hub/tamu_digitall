@@ -51,7 +51,7 @@ $active_menu = 'aktivitas';
 require __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="mb-3">
+<div class="page-header mb-3">
   <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-clock-history me-2"></i>Log Aktivitas</h1>
   <small class="text-muted"><?= (int) $total ?> aktivitas tercatat</small>
 </div>

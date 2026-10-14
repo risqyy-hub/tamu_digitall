@@ -10,6 +10,7 @@
 
 if (!defined('APP_FUNCTIONS_LOADED')) {
     define('APP_FUNCTIONS_LOADED', true);
+    define('HASIL_KUNJUNGAN_MAX', 4000); // batas karakter catatan hasil kunjungan
 
     require_once __DIR__ . '/../config/database.php';
     require_once __DIR__ . '/auth.php';
@@ -424,6 +425,51 @@ function pagination(int $total, int $page, int $perPage, string $baseUrl, array 
     $html .= $mk(min($pages, $page + 1), '&raquo;', $page >= $pages);
     $html .= '</ul></nav>';
     return $html;
+}
+
+/* ============================================================
+ *  HASIL KUNJUNGAN
+ * ============================================================ */
+
+/** Apakah catatan hasil kunjungan terisi? (null / string kosong = belum ada) */
+function hasil_kunjungan_ada($nilai): bool
+{
+    return trim((string) $nilai) !== '';
+}
+
+/**
+ * Sel tabel untuk kolom Hasil Kunjungan (daftar kunjungan & riwayat).
+ * Teks asli dari database tetap utuh di DOM - pemotongan visual dilakukan CSS
+ * (.hasil-clamp), sehingga tidak ada data yang dipotong di sisi server.
+ * Catatan kosong ditampilkan sebagai tanda "-"
+ *
+ * @param mixed  $nilai     visits.hasil_kunjungan
+ * @param string $detailUrl opsional: tautan "Lihat Detail" utk catatan panjang
+ */
+function cell_hasil_kunjungan($nilai, string $detailUrl = ''): string
+{
+    $teks = (string) $nilai;
+    if (trim($teks) === '') {
+        return '<span class="text-muted">&mdash;</span>';
+    }
+
+    $html = '<span class="hasil-clamp" title="' . e($teks) . '">' . e($teks) . '</span>';
+    if ($detailUrl !== '' && mb_strlen(trim($teks)) > 80) {
+        $html .= '<br><a href="' . e($detailUrl) . '" class="small text-decoration-none">Lihat Detail</a>';
+    }
+    return $html;
+}
+
+/**
+ * Tampilan lengkap hasil kunjungan (halaman detail / cetak).
+ * Catatan kosong ditampilkan sebagai teks "Belum ada hasil kunjungan".
+ */
+function tampil_hasil_kunjungan($nilai): string
+{
+    if (trim((string) $nilai) === '') {
+        return '<span class="text-muted">Belum ada hasil kunjungan</span>';
+    }
+    return nl2br(e($nilai));
 }
 
 /* ============================================================

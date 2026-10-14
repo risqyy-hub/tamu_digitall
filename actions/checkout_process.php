@@ -72,12 +72,27 @@ try {
     $now      = date('Y-m-d H:i:s');
     $durasi   = max(0, (int) floor((strtotime($now) - strtotime($visit['jam_masuk'])) / 60));
 
-    $st = $pdo->prepare(
-        "UPDATE visits
-         SET jam_keluar = ?, durasi_menit = ?, status = 'selesai', petugas_keluar_id = ?
-         WHERE id = ? AND status = 'berlangsung'"
-    );
-    $st->execute([$now, $durasi, current_user_id(), $id]);
+    // Hasil kunjungan BOLEH kosong; nilai kosong TIDAK menimpa catatan lama.
+    $hasil = req_str('hasil_kunjungan');
+    if (mb_strlen($hasil) > HASIL_KUNJUNGAN_MAX) {
+        throw new RuntimeException('Hasil kunjungan terlalu panjang (maksimal '
+            . HASIL_KUNJUNGAN_MAX . ' karakter).');
+    }
+
+    $sql    = "UPDATE visits
+               SET jam_keluar = ?, durasi_menit = ?, status = 'selesai', petugas_keluar_id = ?";
+    $params = [$now, $durasi, current_user_id()];
+
+    if ($hasil !== '') {
+        $sql         .= ', hasil_kunjungan = ?';
+        $params[]     = $hasil;
+    }
+
+    $sql         .= ' WHERE id = ? AND status = \'berlangsung\'';
+    $params[]     = $id;
+
+    $st = $pdo->prepare($sql);
+    $st->execute($params);
 
     $pdo->commit();
 } catch (Throwable $e) {

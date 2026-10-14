@@ -28,14 +28,15 @@ try {
     // abaikan bila tabel belum tersedia
 }
 ?>
-<nav class="navbar navbar-expand navbar-light app-navbar bg-white border-bottom sticky-top px-3">
-  <button class="btn btn-light border me-2 d-lg-none" type="button"
+<nav class="navbar navbar-expand navbar-dark app-navbar sticky-top px-3">
+  <button class="btn btn-sm btn-menu-toggle me-2 d-lg-none" type="button"
           data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu"
           aria-label="Buka menu">
     <i class="bi bi-list"></i>
   </button>
-  <span class="navbar-brand fw-bold text-navy mb-0">
-    <i class="bi bi-journal-bookmark-fill me-1"></i><?= e(setting('nama_instansi', APP_NAME)) ?>
+  <span class="navbar-brand d-flex align-items-center gap-2 mb-0">
+    <span class="brand-tile"><i class="bi bi-journal-bookmark-fill"></i></span>
+    <span class="brand-text"><?= e(setting('nama_instansi', APP_NAME)) ?></span>
   </span>
 
   <ul class="navbar-nav ms-auto align-items-center">
@@ -44,7 +45,7 @@ try {
          title="Notifikasi">
         <i class="bi bi-bell fs-5"></i>
         <?php if ($notifUnread > 0): ?>
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill notif-badge"
                 style="font-size:.62rem"><?= $notifUnread > 99 ? '99+' : $notifUnread ?></span>
         <?php endif; ?>
       </a>
@@ -80,8 +81,7 @@ try {
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown"
          aria-expanded="false">
-        <span class="rounded-circle bg-navy text-white d-inline-flex align-items-center justify-content-center"
-              style="width:32px;height:32px">
+        <span class="user-avatar">
           <i class="bi bi-person-fill"></i>
         </span>
         <span class="ms-2 d-none d-sm-inline small">

@@ -11,7 +11,7 @@ $active_menu = 'pengaturan';
 require __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="mb-3">
+<div class="page-header mb-3">
   <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-gear me-2"></i>Pengaturan Aplikasi</h1>
   <small class="text-muted">Konfigurasi identitas instansi & layanan buku tamu</small>
 </div>

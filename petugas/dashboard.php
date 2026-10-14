@@ -40,7 +40,7 @@ $active_menu = 'dashboard';
 require __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <div>
     <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-speedometer2 me-2"></i>Dashboard Petugas</h1>
     <small class="text-muted">Selamat bertugas, <?= e(current_user()['nama']) ?> &middot; <?= e(date('d/m/Y H:i')) ?> WIB</small>
@@ -66,10 +66,10 @@ require __DIR__ . '/../includes/header.php';
   foreach ($cards as [$label, $value, $icon, $cls]): ?>
     <div class="col-6 col-xl-3">
       <div class="card stat-card">
-        <div class="card-body py-3">
-          <span class="stat-icon <?= e($cls) ?> mb-2"><i class="bi <?= e($icon) ?>"></i></span>
+        <div class="card-body">
+          <span class="stat-icon <?= e($cls) ?> mb-3"><i class="bi <?= e($icon) ?>"></i></span>
           <div class="stat-value"><?= (int) $value ?></div>
-          <div class="text-muted small"><?= e($label) ?></div>
+          <div class="stat-label"><?= e($label) ?></div>
         </div>
       </div>
     </div>
@@ -100,7 +100,14 @@ require __DIR__ . '/../includes/header.php';
                 <span class="fw-semibold"><?= e($k['nama_tamu']) ?></span><br>
                 <span class="text-muted small"><?= e($k['nama_perusahaan'] ?: $k['telepon']) ?></span>
               </td>
-              <td class="small"><?= e($k['tujuan']) ?><br><span class="text-muted">&rarr; <?= e($k['pegawai_ditemui']) ?></span></td>
+              <td class="small">
+                <?= e($k['tujuan']) ?><br><span class="text-muted">&rarr; <?= e($k['pegawai_ditemui']) ?></span>
+                <?php if (hasil_kunjungan_ada($k['hasil_kunjungan'] ?? null)): ?>
+                  <br><span class="text-muted"><i class="bi bi-journal-text"></i>
+                    <span class="hasil-clamp" title="<?= e($k['hasil_kunjungan']) ?>"><?= e($k['hasil_kunjungan']) ?></span>
+                  </span>
+                <?php endif; ?>
+              </td>
               <td class="text-center small" data-durasi-start="<?= e(date('c', strtotime($k['jam_masuk']))) ?>">
                 <?= e(format_durasi(durasi_berjalan($k['jam_masuk']))) ?>
               </td>
@@ -113,7 +120,7 @@ require __DIR__ . '/../includes/header.php';
               </td>
               <td class="text-end">
                 <a href="<?= e(url('petugas/kunjungan/detail.php?id=' . (int) $k['id'])) ?>"
-                   class="btn btn-outline-navy btn-sm"><i class="bi bi-eye"></i></a>
+                   class="btn btn-outline-navy btn-sm btn-icon" title="Lihat detail"><i class="bi bi-eye"></i></a>
               </td>
             </tr>
           <?php endforeach; ?>
@@ -151,7 +158,7 @@ require __DIR__ . '/../includes/header.php';
       <div class="panel-header p-3">
         <h2 class="h6 fw-bold text-navy mb-0"><i class="bi bi-activity me-2"></i>Aktivitas Saya</h2>
       </div>
-      <ul class="list-group list-group-flush small">
+      <ul class="list-group list-group-flush small activity-timeline">
         <?php if (!$logList): ?>
           <li class="list-group-item text-muted">Belum ada aktivitas.</li>
         <?php endif; ?>

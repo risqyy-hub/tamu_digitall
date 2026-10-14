@@ -40,7 +40,7 @@ $active_menu = 'mitra';
 require __DIR__ . '/../../includes/header.php';
 ?>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <div>
     <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-building me-2"></i>Perusahaan Mitra</h1>
     <small class="text-muted"><?= $total ?> mitra terdaftar</small>
@@ -93,7 +93,7 @@ require __DIR__ . '/../../includes/header.php';
           <td class="text-center"><?= (int) $r['jumlah_kunjungan'] ?></td>
           <td><?= badge_status($r['status']) ?></td>
           <td class="text-end">
-            <a href="<?= e(url('admin/mitra/detail.php?id=' . (int) $r['id'])) ?>" class="btn btn-outline-navy btn-sm" title="Detail">
+            <a href="<?= e(url('admin/mitra/detail.php?id=' . (int) $r['id'])) ?>" class="btn btn-outline-navy btn-sm btn-icon" title="Detail">
               <i class="bi bi-eye"></i>
             </a>
             <a href="<?= e(url('admin/mitra/edit.php?id=' . (int) $r['id'])) ?>" class="btn btn-outline-secondary btn-sm" title="Ubah">

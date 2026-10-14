@@ -63,7 +63,7 @@ $active_menu = 'qr';
 require __DIR__ . '/../../includes/header.php';
 ?>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <div>
     <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-qr-code me-2"></i>QR Code Tamu Terdaftar</h1>
     <small class="text-muted"><?= $total ?> QR diterbitkan &middot; token disimpan sebagai hash SHA-256</small>
@@ -138,7 +138,7 @@ require __DIR__ . '/../../includes/header.php';
           <td class="small"><?= e($r['issued_nama'] ?: '-') ?><br><?= e(format_tgl_waktu($r['created_at'])) ?></td>
           <td class="text-end text-nowrap">
             <a href="<?= e(url('admin/qr/tampil.php?id=' . (int) $r['id'])) ?>"
-               class="btn btn-outline-navy btn-sm" title="Lihat QR (hanya bisa saat baru diterbitkan)">
+               class="btn btn-outline-navy btn-sm btn-icon" title="Lihat QR (hanya bisa saat baru diterbitkan)">
               <i class="bi bi-eye"></i>
             </a>
             <?php if ($r['status'] === 'aktif'): ?>

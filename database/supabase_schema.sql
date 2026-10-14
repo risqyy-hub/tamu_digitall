@@ -120,6 +120,7 @@ CREATE TABLE IF NOT EXISTS visits (
   tujuan                VARCHAR(200) NOT NULL,
   pegawai_ditemui       VARCHAR(120) NOT NULL,
   keperluan             TEXT         DEFAULT NULL,
+  hasil_kunjungan       TEXT         DEFAULT NULL,
   jam_masuk             TIMESTAMPTZ  NOT NULL DEFAULT now(),
   jam_keluar            TIMESTAMPTZ  DEFAULT NULL,
   durasi_menit          INT          DEFAULT NULL,

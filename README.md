@@ -2,7 +2,7 @@
 
 Aplikasi web pengelolaan buku tamu digital dengan **check-in berbasis QR Code**,
 monitoring kunjungan secara real-time, pengelolaan jaminan (KTP/dokumen),
-pelaporan + cetak/ekspor CSV, serta log audit aktivitas.
+**catatan hasil kunjungan**, pelaporan + cetak/ekspor CSV, serta log audit aktivitas.
 
 - **Backend:** PHP Native (tanpa framework), PDO prepared statements, session, CSRF
 - **Frontend:** Bootstrap 5, Chart.js, SweetAlert2, jsQR (scanner kamera)
@@ -35,6 +35,11 @@ baris pengguna (akun dibuat lewat CLI).
 
 *(Opsional)* Impor `database/demo_data.sql` untuk memuat data contoh
 (kunjungan, jaminan, tamu, mitra) agar tampilan dashboard/laporan langsung terisi.
+
+> **Database lama (upgrade):** kolom `visits.hasil_kunjungan` ditambahkan lewat
+> file migrasi aman `database/migrations/001_tambah_hasil_kunjungan.sql`
+> (`ADD COLUMN IF NOT EXISTS`) — tidak menghapus kolom/data lama, tidak membuat
+> tabel baru, dan kunjungan lama tetap tampil (catatan kosong ditampilkan `—`).
 
 ### b. Konfigurasi environment
 
@@ -108,7 +113,30 @@ Form kunjungan juga mendukung **check-in manual** dan **walk-in** (tamu baru tan
 - Check-out ganda (kunjungan sudah `selesai`) **ditolak**.
 - Durasi kunjungan dihitung otomatis dan setiap aksi dicatat ke **log audit**.
 
-## 5. Laporan, Cetak & CSV (aturan revisi mentor #3)
+## 5. Hasil Kunjungan
+
+Kolom **`visits.hasil_kunjungan`** (`TEXT`, boleh `NULL`) menyimpan catatan apa yang
+terjadi setelah tamu menemui pegawai / menyelesaikan aktivitasnya.
+
+- **Form check-in** (`kunjungan/tambah.php`) menyediakan textarea **opsional**
+  — hasil **tidak diwajibkan** saat check-in karena aktivitas belum dilakukan.
+- **Halaman detail kunjungan** menyediakan panel *Hasil Kunjungan* + tombol
+  **Simpan Hasil** (`actions/kunjungan_process.php`, aksi `simpan_hasil`) untuk
+  mengisi/memperbarui catatan kapan saja, termasuk setelah check-out.
+- **Proses check-out** (`actions/checkout_process.php`) menerima textarea opsional;
+  nilai kosong **tidak** menimpa catatan yang sudah tersimpan.
+- Tampilan: kolom **Hasil Kunjungan** muncul **setelah kolom Tujuan** pada
+  Semua Kunjungan (admin & petugas), riwayat di detail tamu, laporan (layar &
+  cetak/PDF), dan ekspor CSV. Catatan panjang dirapikan maksimal 2 baris
+  (CSS `.hasil-clamp` + tautan **Lihat Detail**) tanpa memotong data di database.
+- Kunjungan lama / masih berlangsung tanpa catatan ditampilkan `—` atau
+  **"Belum ada hasil kunjungan"** — bukan kesalahan sistem.
+- Batas 4000 karakter, divalidasi di server, disimpan dengan prepared statement
+  (PDO) dan hanya oleh pengguna yang sudah login (role guard `petugas`).
+
+---
+
+## 6. Laporan, Cetak & CSV (aturan revisi mentor #3)
 
 `admin/laporan/`:
 
@@ -120,7 +148,7 @@ Form kunjungan juga mendukung **check-in manual** dan **walk-in** (tamu baru tan
 
 ---
 
-## 6. Struktur Proyek
+## 7. Struktur Proyek
 
 ```
 buku_tamu_digital/
@@ -136,9 +164,11 @@ buku_tamu_digital/
 ├── database.sql       # skema MySQL/MariaDB (yang diimpor)
 ├── database/
 │   ├── supabase_schema.sql  # skema PostgreSQL untuk migrasi Supabase
-│   └── demo_data.sql        # data contoh (opsional)
+│   ├── demo_data.sql        # data contoh (opsional)
+│   └── migrations/          # migrasi inkremental (aman dijalankan ulang)
 ├── setup/create_admin.php   # CLI pembuatan akun
 ├── tests/e2e_test.php       # suite E2E berbasis curl (48 asersi)
+├── tests/hasil_kunjungan_test.php  # suite fitur Hasil Kunjungan (46 asersi)
 └── .env / .env.example
 ```
 
@@ -149,7 +179,7 @@ token QR disimpan sebagai hash, dan audit log untuk setiap aksi penting.
 
 ---
 
-## 7. Menjalankan Test E2E
+## 8. Menjalankan Test E2E
 
 ```bash
 C:\xampp\php\php.exe tests/e2e_test.php [baseURL] [adminUser] [adminPass] [petugasUser] [petugasPass]
@@ -165,9 +195,20 @@ Suite ini mencakup login, CRUD, penerbitan QR + validasi token, penolakan
 check-out berjaminan, perhitungan durasi, halaman laporan, ekspor CSV (BOM & header),
 guard role, dsb. (48 asersi).
 
+Untuk fitur **Hasil Kunjungan** tersedia suite terpisah:
+
+```bash
+php tests/hasil_kunjungan_test.php [baseURL] [adminUser] [adminPass] [petugasUser] [petugasPass]
+```
+
+46 asersi: struktur kolom, check-in tanpa hasil (NULL), simpan/perbarui hasil,
+pengosongan, check-out (menyimpan & mempertahankan catatan), kolom pada tabel
+admin/petugas, kunjungan lama (`—`), validasi 4000 karakter, CSRF, hak akses,
+monitoring, riwayat, laporan, cetak & CSV — data uji dibersihkan otomatis.
+
 ---
 
-## 8. Migrasi ke Supabase (PostgreSQL) — untuk nanti
+## 9. Migrasi ke Supabase (PostgreSQL) — untuk nanti
 
 Skema PostgreSQL lengkap (dengan trigger, index, identity) sudah disiapkan di
 **`database/supabase_schema.sql`**. Langkah saat diminta berpindah:
@@ -191,7 +232,7 @@ Skema PostgreSQL lengkap (dengan trigger, index, identity) sudah disiapkan di
 
 ---
 
-## 9. Catatan
+## 10. Catatan
 
 - Zona waktu disamakan antara PHP (`Asia/Jakarta`) dan sesi MySQL (`+07:00`)
   agar timestamp konsisten.

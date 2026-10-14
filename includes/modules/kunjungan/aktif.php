@@ -31,7 +31,7 @@ $active_menu = 'aktif';
 require __DIR__ . '/../../header.php';
 ?>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <div>
     <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-hourglass-split me-2"></i>Kunjungan Aktif</h1>
     <small class="text-muted"><?= $totalAktif ?> tamu sedang berada di kantor</small>
@@ -74,7 +74,14 @@ require __DIR__ . '/../../header.php';
             <span class="text-muted small"><?= e($r['telepon'] ?: $r['kode_tamu']) ?></span>
           </td>
           <td class="small"><?= e($r['nama_perusahaan'] ?: ($r['instansi'] ?: '-')) ?></td>
-          <td class="small"><?= e($r['tujuan']) ?><br><span class="text-muted">&rarr; <?= e($r['pegawai_ditemui']) ?></span></td>
+          <td class="small">
+            <?= e($r['tujuan']) ?><br><span class="text-muted">&rarr; <?= e($r['pegawai_ditemui']) ?></span>
+            <?php if (hasil_kunjungan_ada($r['hasil_kunjungan'] ?? null)): ?>
+              <br><span class="text-muted"><i class="bi bi-journal-text"></i>
+                <span class="hasil-clamp" title="<?= e($r['hasil_kunjungan']) ?>"><?= e($r['hasil_kunjungan']) ?></span>
+              </span>
+            <?php endif; ?>
+          </td>
           <td class="small"><?= e(format_waktu($r['jam_masuk'])) ?></td>
           <td class="text-center small" data-durasi-start="<?= e(date('c', strtotime($r['jam_masuk']))) ?>">
             <?= e(format_durasi(durasi_berjalan($r['jam_masuk']))) ?>
@@ -90,7 +97,7 @@ require __DIR__ . '/../../header.php';
           </td>
           <td class="text-end no-print">
             <a href="<?= e(url($base . '/detail.php?id=' . (int) $r['id'])) ?>"
-               class="btn btn-outline-navy btn-sm" title="Detail">
+               class="btn btn-outline-navy btn-sm btn-icon" title="Detail">
               <i class="bi bi-eye"></i>
             </a>
             <form method="post" action="<?= e(url('actions/checkout_process.php')) ?>" class="d-inline"

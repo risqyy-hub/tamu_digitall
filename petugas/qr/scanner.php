@@ -18,7 +18,7 @@ $active_menu = 'scanner';
 require __DIR__ . '/../../includes/header.php';
 ?>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <div>
     <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-qr-code-scan me-2"></i>Scanner QR Code</h1>
     <small class="text-muted">Pindai QR tamu terdaftar untuk check-in cepat</small>
@@ -31,7 +31,7 @@ require __DIR__ . '/../../includes/header.php';
 <div class="row g-3">
   <div class="col-lg-6">
     <div class="panel p-3 p-md-4 text-center">
-      <div class="position-relative d-inline-block">
+      <div class="scanner-frame position-relative d-inline-block">
         <video id="scanVideo" class="scanner-video" playsinline muted></video>
         <canvas id="scanCanvas" class="d-none"></canvas>
       </div>

@@ -80,7 +80,7 @@ $active_menu = 'kunjungan';
 require __DIR__ . '/../../header.php';
 ?>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <div>
     <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-door-open me-2"></i>Semua Kunjungan</h1>
     <small class="text-muted"><?= $total ?> kunjungan ditemukan</small>
@@ -146,6 +146,7 @@ require __DIR__ . '/../../header.php';
           <th>Tamu</th>
           <th>Instansi</th>
           <th>Tujuan</th>
+          <th>Hasil Kunjungan</th>
           <th>Masuk</th>
           <th>Keluar</th>
           <th class="text-center">Durasi</th>
@@ -155,7 +156,7 @@ require __DIR__ . '/../../header.php';
       </thead>
       <tbody>
       <?php if (!$rows): ?>
-        <tr><td colspan="9">
+        <tr><td colspan="10">
           <div class="empty-state">
             <i class="bi bi-inbox"></i>Belum ada data kunjungan yang cocok dengan filter.
           </div>
@@ -171,6 +172,9 @@ require __DIR__ . '/../../header.php';
           </td>
           <td class="small"><?= e($r['nama_perusahaan'] ?: $r['instansi'] ?: '-') ?></td>
           <td class="small"><?= e($r['tujuan']) ?></td>
+          <td class="small hasil-cell">
+            <?= cell_hasil_kunjungan($r['hasil_kunjungan'] ?? null, url($base . '/detail.php?id=' . (int) $r['id'])) ?>
+          </td>
           <td class="small"><?= e(format_tgl_waktu($r['jam_masuk'])) ?></td>
           <td class="small"><?= e(format_tgl_waktu($r['jam_keluar'])) ?></td>
           <td class="text-center small"
@@ -187,7 +191,7 @@ require __DIR__ . '/../../header.php';
           </td>
           <td class="text-end no-print">
             <a href="<?= e(url($base . '/detail.php?id=' . (int) $r['id'])) ?>"
-               class="btn btn-outline-navy btn-sm" title="Detail">
+               class="btn btn-outline-navy btn-sm btn-icon" title="Detail">
               <i class="bi bi-eye"></i>
             </a>
           </td>

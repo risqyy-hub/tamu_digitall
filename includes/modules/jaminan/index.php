@@ -63,7 +63,7 @@ $active_menu = 'jaminan';
 require __DIR__ . '/../../header.php';
 ?>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <div>
     <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-box-seam me-2"></i>Manajemen Jaminan</h1>
     <small class="text-muted">
@@ -147,7 +147,7 @@ require __DIR__ . '/../../header.php';
               </form>
             <?php endif; ?>
             <a href="<?= e(url($AREA . '/kunjungan/detail.php?id=' . (int) $g['visit_id'])) ?>"
-               class="btn btn-outline-navy btn-sm" title="Lihat kunjungan">
+               class="btn btn-outline-navy btn-sm btn-icon" title="Lihat kunjungan">
               <i class="bi bi-eye"></i>
             </a>
           </td>

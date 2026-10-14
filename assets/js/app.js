@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* --- Chart.js: font global konsisten --- */
   if (window.Chart) {
-    Chart.defaults.font.family = '"Segoe UI", system-ui, sans-serif';
-    Chart.defaults.color = '#5b6579';
+    Chart.defaults.font.family = '"Inter", "Segoe UI", system-ui, sans-serif';
+    Chart.defaults.color = '#5E6E86';
   }
 });

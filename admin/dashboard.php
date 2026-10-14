@@ -74,7 +74,7 @@ $active_menu = 'dashboard';
 require __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <div>
     <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-speedometer2 me-2"></i>Dashboard Admin</h1>
     <small class="text-muted">Ringkasan monitoring kunjungan &middot; <?= e(date('d/m/Y H:i', time())) ?> WIB</small>
@@ -103,12 +103,12 @@ require __DIR__ . '/../includes/header.php';
   foreach ($cards as [$label, $value, $icon, $cls]): ?>
     <div class="col-6 col-md-4 col-xl-2">
       <div class="card stat-card">
-        <div class="card-body py-3">
-          <div class="d-flex align-items-center gap-2 mb-2">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-2 mb-3">
             <span class="stat-icon <?= e($cls) ?>"><i class="bi <?= e($icon) ?>"></i></span>
           </div>
           <div class="stat-value"><?= (int) $value ?></div>
-          <div class="text-muted small"><?= e($label) ?></div>
+          <div class="stat-label"><?= e($label) ?></div>
         </div>
       </div>
     </div>
@@ -151,6 +151,11 @@ require __DIR__ . '/../includes/header.php';
                   <?= e($k['nama_tamu']) ?>
                 </a><br>
                 <span class="small text-muted"><?= e($k['nama_perusahaan'] ?: $k['tujuan']) ?></span>
+                <?php if (hasil_kunjungan_ada($k['hasil_kunjungan'] ?? null)): ?>
+                  <br><span class="small text-muted"><i class="bi bi-journal-text"></i>
+                    <span class="hasil-clamp" title="<?= e($k['hasil_kunjungan']) ?>"><?= e($k['hasil_kunjungan']) ?></span>
+                  </span>
+                <?php endif; ?>
               </td>
               <td class="small text-end">
                 <span data-durasi-start="<?= e(date('c', strtotime($k['jam_masuk']))) ?>">
@@ -201,7 +206,7 @@ require __DIR__ . '/../includes/header.php';
         <h2 class="h6 fw-bold text-navy mb-0"><i class="bi bi-activity me-2"></i>Aktivitas</h2>
         <a href="<?= e(url('admin/aktivitas.php')) ?>" class="small text-decoration-none">semua &raquo;</a>
       </div>
-      <ul class="list-group list-group-flush small">
+      <ul class="list-group list-group-flush small activity-timeline">
         <?php if (!$logList): ?>
           <li class="list-group-item text-muted">Belum ada aktivitas tercatat.</li>
         <?php endif; ?>
@@ -225,7 +230,8 @@ new Chart(document.getElementById('chartKunjungan'), {
     datasets: [{
       label: 'Jumlah kunjungan',
       data: <?= json_encode($chartJml) ?>,
-      backgroundColor: 'rgba(11, 42, 91, .82)',
+      backgroundColor: 'rgba(23, 59, 99, .85)',
+      hoverBackgroundColor: '#0B1F3A',
       borderRadius: 6
     }]
   },
@@ -241,7 +247,8 @@ new Chart(document.getElementById('chartStatus'), {
     labels: ['Berlangsung', 'Selesai'],
     datasets: [{
       data: [<?= (int) $statusMap['berlangsung'] ?>, <?= (int) $statusMap['selesai'] ?>],
-      backgroundColor: ['#0b2a5b', '#94a3b8']
+      backgroundColor: ['#173B63', '#4CAF88'],
+      hoverOffset: 6
     }]
   },
   options: { plugins: { legend: { position: 'bottom' } } }

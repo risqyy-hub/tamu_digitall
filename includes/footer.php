@@ -10,7 +10,7 @@ if (!defined('APP_FUNCTIONS_LOADED')) {
   </div><!-- /.container-fluid -->
 </main>
 
-<footer class="app-footer text-center text-muted small py-3 border-top bg-white">
+<footer class="app-footer text-center small py-3">
   &copy; <?= date('Y') ?> <?= e(setting('nama_instansi', APP_NAME)) ?> &middot; Sistem Informasi Buku Tamu Digital
 </footer>
 

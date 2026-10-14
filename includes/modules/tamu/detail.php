@@ -103,13 +103,13 @@ require __DIR__ . '/../../header.php';
         <table class="table table-hover align-middle mb-0">
           <thead>
             <tr>
-              <th>No. Kunjungan</th><th>Tujuan</th><th>Petugas</th>
+              <th>No. Kunjungan</th><th>Tujuan</th><th>Hasil Kunjungan</th><th>Petugas</th>
               <th>Masuk</th><th>Keluar</th><th>Status</th><th class="no-print"></th>
             </tr>
           </thead>
           <tbody>
           <?php if (!$kunjungan): ?>
-            <tr><td colspan="7">
+            <tr><td colspan="8">
               <div class="empty-state"><i class="bi bi-door-closed"></i>Belum ada riwayat kunjungan.</div>
             </td></tr>
           <?php endif; ?>
@@ -117,13 +117,16 @@ require __DIR__ . '/../../header.php';
             <tr>
               <td class="small"><?= e($k['kode_kunjungan']) ?></td>
               <td class="small"><?= e($k['tujuan']) ?></td>
+              <td class="small hasil-cell">
+                <?= cell_hasil_kunjungan($k['hasil_kunjungan'] ?? null, url($AREA . '/kunjungan/detail.php?id=' . (int) $k['id'])) ?>
+              </td>
               <td class="small"><?= e($k['petugas_masuk'] ?: '-') ?></td>
               <td class="small"><?= e(format_tgl_waktu($k['jam_masuk'])) ?></td>
               <td class="small"><?= e(format_tgl_waktu($k['jam_keluar'])) ?></td>
               <td><?= badge_status($k['status']) ?></td>
               <td class="text-end no-print">
                 <a href="<?= e(url($AREA . '/kunjungan/detail.php?id=' . (int) $k['id'])) ?>"
-                   class="btn btn-outline-navy btn-sm"><i class="bi bi-eye"></i></a>
+                   class="btn btn-outline-navy btn-sm btn-icon" title="Lihat detail"><i class="bi bi-eye"></i></a>
               </td>
             </tr>
           <?php endforeach; ?>

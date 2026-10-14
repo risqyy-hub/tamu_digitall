@@ -45,7 +45,7 @@ $active_menu = 'tamu';
 require __DIR__ . '/../../header.php';
 ?>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <div>
     <h1 class="h5 fw-bold text-navy mb-0"><i class="bi bi-people me-2"></i>Data Tamu</h1>
     <small class="text-muted"><?= $total ?> data tamu tercatat</small>
@@ -118,7 +118,7 @@ require __DIR__ . '/../../header.php';
           <td class="text-center"><?= (int) $r['total_kunjungan'] ?></td>
           <td class="text-end no-print">
             <a href="<?= e(url($base . '/detail.php?id=' . (int) $r['id'])) ?>"
-               class="btn btn-outline-navy btn-sm" title="Detail"><i class="bi bi-eye"></i></a>
+               class="btn btn-outline-navy btn-sm btn-icon" title="Detail"><i class="bi bi-eye"></i></a>
             <a href="<?= e(url($base . '/edit.php?id=' . (int) $r['id'])) ?>"
                class="btn btn-outline-secondary btn-sm" title="Ubah"><i class="bi bi-pencil"></i></a>
             <?php if (is_admin()): ?>
