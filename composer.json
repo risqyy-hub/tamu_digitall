@@ -1,0 +1,16 @@
+{
+    "name": "local/buku-tamu-digital",
+    "description": "Sistem Informasi Buku Tamu Digital dan Monitoring Kunjungan Berbasis Web (PHP Native)",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.1",
+        "chillerlan/php-qrcode": "^4.4"
+    },
+    "config": {
+        "platform": {
+            "php": "8.1.25"
+        },
+        "optimize-autoloader": true
+    }
+}

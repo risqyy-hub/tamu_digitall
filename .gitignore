@@ -1,0 +1,10 @@
+# File lingkungan berisi kredensial - JANGAN di-commit ke Git
+.env
+
+# Dependency Composer
+/vendor/
+
+# Upload bukti jaminan (jangan di-commit)
+/uploads/bukti-jaminan/*
+!/uploads/bukti-jaminan/.htaccess
+!/uploads/bukti-jaminan/README.txt

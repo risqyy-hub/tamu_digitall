@@ -1,0 +1,5 @@
+# Larangan eksekusi script di folder upload
+<FilesMatch "\.(?i:php|phtml|phar|cgi|pl|py)$">
+    Require all denied
+</FilesMatch>
+Options -Indexes -ExecCGI
