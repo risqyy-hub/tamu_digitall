@@ -65,7 +65,8 @@ $tujuanSaran   = ['Bidang Umum', 'Bidang Keuangan', 'Bidang SDM', 'Bidang Teknol
 $pegawaiSaran  = [];
 
 $page_title = 'Tambah Kunjungan';
-$active_menu = 'kunjungan';
+// Petugas: menyorot submenu "Tambah Kunjungan" di sidebar; admin tetap pada "Semua Kunjungan".
+$active_menu = ($AREA === 'petugas') ? 'tambah' : 'kunjungan';
 require __DIR__ . '/../../header.php';
 ?>
 

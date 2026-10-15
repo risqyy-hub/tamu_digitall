@@ -72,7 +72,8 @@ try {
     $now      = date('Y-m-d H:i:s');
     $durasi   = max(0, (int) floor((strtotime($now) - strtotime($visit['jam_masuk'])) / 60));
 
-    // Hasil kunjungan BOLEH kosong; nilai kosong TIDAK menimpa catatan lama.
+    // Hasil kunjungan: hanya diisi bila BELUM PERNAH tersimpan.
+    // Hasil yang sudah tersimpan tidak boleh diubah/ditimpa oleh check-out.
     $hasil = req_str('hasil_kunjungan');
     if (mb_strlen($hasil) > HASIL_KUNJUNGAN_MAX) {
         throw new RuntimeException('Hasil kunjungan terlalu panjang (maksimal '
@@ -83,10 +84,13 @@ try {
                SET jam_keluar = ?, durasi_menit = ?, status = 'selesai', petugas_keluar_id = ?";
     $params = [$now, $durasi, current_user_id()];
 
-    if ($hasil !== '') {
+    $hasilTersimpan = hasil_kunjungan_ada($visit['hasil_kunjungan'] ?? null);
+    if ($hasil !== '' && !$hasilTersimpan) {
+        // Baru pertama kali dicatat -> aman disimpan bersama check-out.
         $sql         .= ', hasil_kunjungan = ?';
         $params[]     = $hasil;
     }
+    // Bila sudah ada catatan final: kolom hasil_kunjungan TIDAK disentuh sama sekali.
 
     $sql         .= ' WHERE id = ? AND status = \'berlangsung\'';
     $params[]     = $id;

@@ -25,9 +25,10 @@ if (is_file($envFile)) {
         if ($val !== '' && ($val[0] === '"' || $val[0] === "'") && substr($val, -1) === $val[0]) {
             $val = substr($val, 1, -1);
         }
-        if (getenv($key) === false) {
-            putenv($key . '=' . $val);
-        }
+        // Selalu timpa nilai yang sudah ada: .env adalah sumber utama konfigurasi,
+        // sehingga perubahan file .env langsung terbaca pada request berikutnya
+        // (termasuk pada worker PHP yang prosesnya berjalan terus / persistent).
+        putenv($key . '=' . $val);
         $_ENV[$key] = $val;
     }
 }
@@ -39,15 +40,26 @@ function env(string $key, string $default = ''): string
 }
 
 /* ------------------------------------------------------------
- *  Konfigurasi Database
+ *  Konfigurasi Database (semua kredensial dibaca dari file .env)
+ *  Variabel utama : DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME,
+ *                   DB_PASSWORD, DB_CHARSET (opsional)
+ *  Nama lama      : DB_NAME, DB_USER, DB_PASS masih didukung sebagai cadangan
+ *                   agar konfigurasi .env lama tetap terbaca.
  * ------------------------------------------------------------ */
 define('DB_DRIVER', env('DB_DRIVER', 'mysql'));                 // mysql | pgsql
 define('DB_HOST',   env('DB_HOST', '127.0.0.1'));
 define('DB_PORT',   env('DB_PORT', DB_DRIVER === 'pgsql' ? '5432' : '3306'));
-define('DB_NAME',   env('DB_NAME', DB_DRIVER === 'pgsql' ? 'postgres' : 'buku_tamu_digital'));
-define('DB_USER',   env('DB_USER', DB_DRIVER === 'pgsql' ? 'postgres' : 'root'));
-define('DB_PASS',   env('DB_PASS', ''));
+define('DB_NAME',   env('DB_DATABASE', env('DB_NAME', DB_DRIVER === 'pgsql' ? 'postgres' : 'buku_tamu_digital')));
+define('DB_USER',   env('DB_USERNAME', env('DB_USER', DB_DRIVER === 'pgsql' ? 'postgres' : 'root')));
+define('DB_PASS',   env('DB_PASSWORD', env('DB_PASS', '')));
 define('DB_SSLMODE', env('DB_SSLMODE', DB_DRIVER === 'pgsql' ? 'require' : ''));
+
+// Charset hanya dipakai bila bentuknya aman (huruf/angka/underscore).
+$charset = env('DB_CHARSET', 'utf8mb4');
+if (!preg_match('/^[A-Za-z0-9_]+$/', $charset)) {
+    $charset = 'utf8mb4';
+}
+define('DB_CHARSET', $charset);
 
 /* ------------------------------------------------------------
  *  Konfigurasi Aplikasi
@@ -93,7 +105,13 @@ function db(): PDO
             DB_SSLMODE !== '' ? DB_SSLMODE : 'require'
         );
     } else {
-        $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', DB_HOST, DB_PORT, DB_NAME);
+        $dsn = sprintf(
+            'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+            DB_HOST,
+            DB_PORT,
+            DB_NAME,
+            DB_CHARSET
+        );
     }
 
     $options = [

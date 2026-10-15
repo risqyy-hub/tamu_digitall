@@ -59,7 +59,7 @@ require __DIR__ . '/../../header.php';
         <tr><th style="width:40%">Kode Tamu</th><td><?= e($tamu['kode_tamu']) ?></td></tr>
         <tr><th>Nama</th><td class="fw-semibold"><?= e($tamu['nama']) ?></td></tr>
         <tr><th>Identitas</th><td><?= e($tamu['jenis_identitas']) ?></td></tr>
-        <tr><th>No. Identitas</th><td><?= e($tamu['no_identitas'] ?: '-') ?></td></tr>
+        <tr><th>Nomor Identitas</th><td><?= e($tamu['no_identitas'] ?: '-') ?></td></tr>
         <tr><th>Telepon</th><td><?= e($tamu['telepon'] ?: '-') ?></td></tr>
         <tr><th>Email</th><td><?= e($tamu['email'] ?: '-') ?></td></tr>
         <tr><th>Alamat</th><td><?= e($tamu['alamat'] ?: '-') ?></td></tr>

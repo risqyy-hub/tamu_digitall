@@ -59,7 +59,7 @@ require __DIR__ . '/../../header.php';
         </select>
       </div>
       <div class="col-md-4">
-        <label class="form-label small fw-semibold">No. Identitas</label>
+        <label class="form-label small fw-semibold">Nomor Identitas</label>
         <input type="text" name="no_identitas" class="form-control" maxlength="50" value="<?= e($tamu['no_identitas']) ?>">
       </div>
       <div class="col-md-4">

@@ -12,39 +12,69 @@ verify_csrf();
 $area = is_admin() ? 'admin' : 'petugas';
 $back = $area . '/jaminan/index.php';
 
-// Kembali ke halaman asal (jika masih dalam aplikasi)
+// Kembali ke halaman asal bila referer masih dalam aplikasi (host & path sama).
+// Ini membuat "Kembalikan jaminan" dari Kunjungan Aktif / detail kunjungan
+// tetap kembali ke halaman yang sama, bukan ke daftar jaminan.
 $ref   = $_SERVER['HTTP_REFERER'] ?? '';
-$safeBack = (strpos($ref, BASE_URL) === 0) ? $ref : null;
+$safeBack = null;
+if ($ref !== '' && preg_match('#^https?://#i', $ref)) {
+    $refHost = parse_url($ref, PHP_URL_HOST);
+    $selfHost = parse_url('http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'), PHP_URL_HOST);
+    $sameHost = ($refHost !== null && $selfHost !== null && strcasecmp((string) $refHost, (string) $selfHost) === 0);
+
+    $inApp = false;
+    if ($sameHost) {
+        if (preg_match('#^https?://#i', BASE_URL)) {
+            $inApp = stripos($ref, rtrim(BASE_URL, '/')) === 0;
+        } else {
+            $refPath = (string) parse_url($ref, PHP_URL_PATH);
+            $inApp   = strpos($refPath, rtrim(BASE_URL, '/') . '/') === 0;
+        }
+    }
+    if ($inApp) {
+        $safeBack = $ref;
+    }
+}
 
 $action = req_str('action');
 $pdo    = db();
 
 /* ================= TAMBAH JAMINAN ================= */
 if ($action === 'tambah') {
-    $visitId = req_int('visit_id');
+    $visitIdRaw = req_str('visit_id');
+    $visitId = ctype_digit($visitIdRaw) ? (int) $visitIdRaw : 0;
     $barang  = req_str('barang');
     $jumlah  = req_int('jumlah', 1);
     $ket     = req_str('keterangan');
 
-    if ($visitId <= 0 || $barang === '' || mb_strlen($barang) < 2) {
-        flash_set('warning', 'Kunjungan dan nama barang jaminan wajib diisi.');
-        redirect($area . '/jaminan/tambah.php' . ($visitId > 0 ? '?visit_id=' . $visitId : ''));
+    $formUrl = $area . '/jaminan/tambah.php' . ($visitId > 0 ? '?visit_id=' . $visitId : '');
+    if ($visitId <= 0) {
+        flash_set('warning', 'Kunjungan tidak valid. Buka formulir dari detail kunjungan yang masih berlangsung.');
+        redirect($formUrl);
+    }
+    if ($barang === '' || mb_strlen($barang) < 2) {
+        flash_set('warning', 'Nama barang jaminan wajib diisi (minimal 2 karakter).');
+        redirect($formUrl);
     }
     if ($jumlah < 1 || $jumlah > 999) {
         $jumlah = 1;
     }
 
-    $st = $pdo->prepare('SELECT id, kode_kunjungan, status FROM visits WHERE id = ?');
+    $st = $pdo->prepare(
+        'SELECT vi.id, vi.kode_kunjungan, vi.status
+         FROM visits vi
+         WHERE vi.id = ?'
+    );
     $st->execute([$visitId]);
     $visit = $st->fetch();
 
     if (!$visit) {
         flash_set('danger', 'Kunjungan tidak ditemukan.');
-        redirect($back);
+        redirect($formUrl);
     }
     if ($visit['status'] !== 'berlangsung') {
         flash_set('warning', 'Jaminan hanya dapat ditambahkan pada kunjungan yang masih berlangsung.');
-        redirect($area . '/kunjungan/detail.php?id=' . $visitId);
+        redirect($formUrl);
     }
 
     // Upload bukti (opsional) - divalidasi ketat

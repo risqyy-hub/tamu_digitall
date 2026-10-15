@@ -63,7 +63,7 @@ require __DIR__ . '/../../header.php';
       <div class="col-sm-8 col-md-5">
         <label class="form-label small">Cari</label>
         <input type="text" name="q" class="form-control form-control-sm"
-               placeholder="Nama, kode tamu, no. identitas, telepon..." value="<?= e($q) ?>">
+               placeholder="Nama, kode tamu, nomor identitas, telepon..." value="<?= e($q) ?>">
       </div>
       <div class="col-sm-4 col-md-2">
         <button class="btn btn-navy btn-sm w-100" type="submit">
@@ -84,9 +84,10 @@ require __DIR__ . '/../../header.php';
     <table class="table table-hover align-middle mb-0">
       <thead>
         <tr>
-          <th>Kode</th>
-          <th>Nama</th>
-          <th>Identitas</th>
+          <th>Kode Tamu</th>
+          <th>Nama Tamu</th>
+          <th>Jenis Identitas</th>
+          <th>Nomor Identitas</th>
           <th>Telepon</th>
           <th class="text-center">Terdaftar</th>
           <th class="text-center">Kunjungan</th>
@@ -95,7 +96,7 @@ require __DIR__ . '/../../header.php';
       </thead>
       <tbody>
       <?php if (!$rows): ?>
-        <tr><td colspan="7">
+        <tr><td colspan="8">
           <div class="empty-state">
             <i class="bi bi-people"></i>
             <?php if ($q !== ''): ?>
@@ -110,7 +111,8 @@ require __DIR__ . '/../../header.php';
         <tr>
           <td class="text-muted small"><?= e($r['kode_tamu']) ?></td>
           <td class="fw-semibold"><?= e($r['nama']) ?></td>
-          <td class="small"><?= e($r['jenis_identitas']) ?><?= $r['no_identitas'] ? ' &middot; ' . e($r['no_identitas']) : '' ?></td>
+          <td class="small"><?= e($r['jenis_identitas']) ?></td>
+          <td class="small"><?= $r['no_identitas'] !== null && $r['no_identitas'] !== '' ? e($r['no_identitas']) : '<span class="text-muted">&mdash;</span>' ?></td>
           <td class="small"><?= e($r['telepon'] ?: '-') ?></td>
           <td class="text-center">
             <?= $r['terdaftar'] > 0 ? '<span class="badge text-bg-success">Ya</span>' : '<span class="badge text-bg-secondary">Tidak</span>' ?>

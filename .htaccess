@@ -1,0 +1,24 @@
+# =============================================================
+# Proteksi akses langsung ke file sensitif proyek.
+# Berlaku untuk Apache (XAMPP) dengan AllowOverride All.
+# =============================================================
+
+# Larangan akses ke file lingkungan .env / .env.* (berisi kredensial database)
+<FilesMatch "^\.env">
+    Require all denied
+</FilesMatch>
+
+# Larangan akses ke file tersembunyi lainnya di direktori ini (.htaccess, dsb.)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Blokir permintaan ke path yang menyimpan komponen tersembunyi
+# (contoh: /.git/..., /.env...) tanpa memengaruhi URL normal aplikasi.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule (^|/)\. - [F]
+</IfModule>
+
+# Jangan tampilkan daftar isi folder bila tidak ada index file.
+Options -Indexes

@@ -178,6 +178,10 @@ ok('kolom lain tidak berubah (tujuan/status tetap)',
 
 $r = req("$BASE/admin/kunjungan/detail.php?id=$idA", null, $sA, true);
 ok('detail menampilkan hasil kunjungan lengkap', strpos($r['body'], 'penggantian perangkat') !== false);
+ok('detail menampilkan status "Hasil Kunjungan Tersimpan"',
+    strpos($r['body'], 'Hasil Kunjungan Tersimpan') !== false);
+ok('detail beralih ke mode read-only (form simpan hasil hilang)',
+    strpos($r['body'], 'value="simpan_hasil"') === false && strpos($r['body'], 'id="hasilKunjungan"') === false);
 
 /* ---------- 5. Kolom pada tabel Admin & Petugas ---------- */
 echo "5) Tabel Semua Kunjungan (admin & petugas)\n";
@@ -273,17 +277,27 @@ $r = req("$BASE/actions/kunjungan_process.php", [
 ], $sP);
 ok('kunjungan tidak valid ditolak dengan aman', strpos(loc_of($r['headers']), 'detail.php') !== false);
 
-// Kosongkan hasil kembali (mengizinkan pengosongan oleh yang berwenang)
+// Hasil tersimpan = catatan final: perubahan isi DITOLAK server (UI maupun POST langsung)
+$r = req("$BASE/actions/kunjungan_process.php", [
+    'action' => 'simpan_hasil', 'id' => $idA, 'hasil_kunjungan' => 'HASIL DIUBAH SETELAH TERSIMPAN',
+    'csrf_token' => $tok,
+], $sP);
+$vA = visit_row($idA);
+ok('hasil yang sudah tersimpan TIDAK dapat diubah lewat POST backend',
+    $vA['hasil_kunjungan'] === $hasilA, 'nilai=' . substr((string) $vA['hasil_kunjungan'], 0, 40));
+
+$r2 = req("$BASE/petugas/kunjungan/detail.php?id=$idA", null, $sP, true);
+ok('pesan penolakan (catatan final) tampil di halaman detail',
+    strpos($r2['body'], 'bersifat final') !== false);
+ok('detail tetap mode read-only setelah percobaan perubahan',
+    strpos($r2['body'], 'value="simpan_hasil"') === false);
+
+// Pengosongan hasil juga ditolak - catatan final tidak boleh dihapus
 req("$BASE/actions/kunjungan_process.php", [
     'action' => 'simpan_hasil', 'id' => $idA, 'hasil_kunjungan' => '', 'csrf_token' => $tok,
 ], $sP);
 $vA = visit_row($idA);
-ok('hasil kunjungan dapat dikosongkan kembali', $vA['hasil_kunjungan'] === null);
-
-// isi ulang untuk pengujian laporan
-req("$BASE/actions/kunjungan_process.php", [
-    'action' => 'simpan_hasil', 'id' => $idA, 'hasil_kunjungan' => $hasilA, 'csrf_token' => $tok,
-], $sP);
+ok('hasil kunjungan TIDAK dapat dikosongkan setelah tersimpan', $vA['hasil_kunjungan'] === $hasilA);
 
 /* ---------- 9. Monitoring, riwayat, laporan, cetak, CSV ---------- */
 echo "9) Monitoring, riwayat, laporan, cetak & CSV\n";

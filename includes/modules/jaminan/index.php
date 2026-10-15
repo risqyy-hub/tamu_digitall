@@ -59,7 +59,7 @@ $st = db()->query("SELECT COUNT(*) FROM guarantees WHERE status = 'aktif'");
 $TotalAktif = (int) $st->fetchColumn();
 
 $page_title = 'Jaminan';
-$active_menu = 'jaminan';
+$active_menu = 'aktif';
 require __DIR__ . '/../../header.php';
 ?>
 
@@ -71,7 +71,8 @@ require __DIR__ . '/../../header.php';
       <span class="text-warning fw-semibold"><?= $TotalAktif ?> jaminan belum dikembalikan</span>
     </small>
   </div>
-  <a href="<?= e(url($base . '/tambah.php')) ?>" class="btn btn-navy btn-sm">
+  <a href="<?= e(url($AREA . '/kunjungan/aktif.php')) ?>" class="btn btn-navy btn-sm"
+     title="Pencatatan jaminan dilakukan dari kunjungan yang masih berlangsung">
     <i class="bi bi-plus-lg me-1"></i>Tambah Jaminan
   </a>
 </div>
@@ -83,6 +84,12 @@ require __DIR__ . '/../../header.php';
     <a href="<?= e(url($base . '/index.php?status=aktif')) ?>">Lihat semua jaminan aktif</a>.
   </div>
 <?php endif; ?>
+
+<div class="alert alert-light border py-2 small mb-3">
+  <i class="bi bi-info-circle me-1"></i>
+  Jaminan dikelola bersama kunjungan: buka <a href="<?= e(url($AREA . '/kunjungan/aktif.php')) ?>">Kunjungan Aktif</a>,
+  lalu tekan tombol jumlah jaminan pada baris kunjungan untuk melihat detail, mencatat, atau mengembalikan jaminan.
+</div>
 
 <div class="panel">
   <div class="panel-header p-3">

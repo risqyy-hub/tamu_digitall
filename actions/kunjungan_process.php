@@ -16,9 +16,11 @@ $base = $area . '/kunjungan';
 $action = req_str('action');
 
 /* ============================================================
- *  SIMPAN / PERBARUI HASIL KUNJUNGAN
+ *  SIMPAN HASIL KUNJUNGAN (sekali simpan -> catatan final)
  *  Satu-satunya kolom yang disentuh: visits.hasil_kunjungan.
- *  Boleh kosong (kunjungan berlangsung / belum ada catatan).
+ *  Boleh kosong (kunjungan berlangsung / belum ada catatan),
+ *  TETAPI hasil yang sudah tersimpan tidak dapat diubah/dikosongkan
+ *  lagi - baik lewat UI maupun permintaan POST langsung.
  * ============================================================ */
 if ($action === 'simpan_hasil') {
     $visitId = req_int('id');
@@ -37,18 +39,52 @@ if ($action === 'simpan_hasil') {
     $pdo = db();
 
     try {
-        $st = $pdo->prepare('SELECT id, kode_kunjungan FROM visits WHERE id = ?');
+        // Kunci baris agar pemeriksaan status hasil & penyimpanan tidak balapan.
+        $pdo->beginTransaction();
+        $st = $pdo->prepare(
+            'SELECT id, kode_kunjungan, hasil_kunjungan FROM visits WHERE id = ? FOR UPDATE'
+        );
         $st->execute([$visitId]);
         $visit = $st->fetch();
 
         if (!$visit) {
+            $pdo->rollBack();
             throw new RuntimeException('Kunjungan tidak ditemukan.');
         }
 
-        // Prepared statement PDO - tidak ada data yang digabung ke SQL.
-        $st = $pdo->prepare('UPDATE visits SET hasil_kunjungan = ? WHERE id = ?');
-        $st->execute([$hasil !== '' ? $hasil : null, $visitId]);
+        // --- Penguncian: hasil tersimpan = catatan final, tidak bisa diubah ---
+        if (hasil_kunjungan_ada($visit['hasil_kunjungan'] ?? null)) {
+            $pdo->rollBack();
+            flash_set('warning', 'Hasil kunjungan ' . $visit['kode_kunjungan']
+                . ' sudah tersimpan dan bersifat final - tidak dapat diubah lagi.');
+            redirect($base . '/detail.php?id=' . $visitId);
+        }
+
+        if ($hasil === '') {
+            $pdo->rollBack();
+            flash_set('info', 'Tidak ada catatan hasil yang disimpan (catatan kosong).');
+            redirect($base . '/detail.php?id=' . $visitId);
+        }
+
+        // Guard tambahan di WHERE: hanya menimpa bila hasil masih kosong.
+        $st = $pdo->prepare(
+            "UPDATE visits SET hasil_kunjungan = ?
+             WHERE id = ? AND (hasil_kunjungan IS NULL OR hasil_kunjungan = '')"
+        );
+        $st->execute([$hasil, $visitId]);
+
+        if ($st->rowCount() === 0) {
+            $pdo->rollBack();
+            flash_set('warning', 'Hasil kunjungan ' . $visit['kode_kunjungan']
+                . ' baru saja tersimpan dan tidak dapat diubah lagi.');
+            redirect($base . '/detail.php?id=' . $visitId);
+        }
+
+        $pdo->commit();
     } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         if ($e instanceof RuntimeException) {
             flash_set('danger', $e->getMessage());
         } else {
@@ -58,10 +94,9 @@ if ($action === 'simpan_hasil') {
         redirect($base . '/detail.php?id=' . $visitId);
     }
 
-    log_aktivitas('Perbarui hasil kunjungan ' . $visit['kode_kunjungan']);
-    flash_set('success', $hasil !== ''
-        ? 'Hasil kunjungan ' . $visit['kode_kunjungan'] . ' berhasil disimpan.'
-        : 'Hasil kunjungan ' . $visit['kode_kunjungan'] . ' dikosongkan.');
+    log_aktivitas('Simpan hasil kunjungan (final) ' . $visit['kode_kunjungan']);
+    flash_set('success', 'Hasil kunjungan ' . $visit['kode_kunjungan']
+        . ' berhasil disimpan dan dikunci sebagai catatan final.');
     redirect($base . '/detail.php?id=' . $visitId);
 }
 

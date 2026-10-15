@@ -10,31 +10,32 @@ if (!defined('APP_FUNCTIONS_LOADED')) {
 require_role('petugas');
 
 $base    = $AREA . '/jaminan';
-$visitId = get_int('visit_id');
+$visitIdRaw = get_str('visit_id');
+$visitId = ctype_digit($visitIdRaw) ? (int) $visitIdRaw : 0;
+$visit = null;
+$visitError = '';
 
-$activeVisits = db()->query(
-    "SELECT vi.id, vi.kode_kunjungan, v.nama AS nama_tamu
-     FROM visits vi JOIN visitors v ON v.id = vi.visitor_id
-     WHERE vi.status = 'berlangsung'
-     ORDER BY vi.jam_masuk DESC"
-)->fetchAll();
+if ($visitId <= 0) {
+    $visitError = 'ID kunjungan tidak tersedia atau tidak valid. Buka formulir dari detail kunjungan yang masih berlangsung.';
+} else {
+    $st = db()->prepare(
+        'SELECT vi.id, vi.kode_kunjungan, vi.status, v.nama AS nama_tamu
+         FROM visits vi
+         JOIN visitors v ON v.id = vi.visitor_id
+         WHERE vi.id = ?'
+    );
+    $st->execute([$visitId]);
+    $visit = $st->fetch() ?: null;
 
-$selected = null;
-if ($visitId > 0) {
-    foreach ($activeVisits as $av) {
-        if ((int) $av['id'] === $visitId) {
-            $selected = $av;
-            break;
-        }
-    }
-    if (!$selected) {
-        flash_set('warning', 'Kunjungan tidak ditemukan atau sudah selesai.');
-        redirect($base . '/index.php');
+    if (!$visit) {
+        $visitError = 'Kunjungan tidak ditemukan. Periksa kembali ID kunjungan.';
+    } elseif ($visit['status'] !== 'berlangsung') {
+        $visitError = 'Jaminan hanya dapat ditambahkan pada kunjungan yang masih berlangsung.';
     }
 }
 
 $page_title = 'Tambah Jaminan';
-$active_menu = 'jaminan';
+$active_menu = 'aktif';
 require __DIR__ . '/../../header.php';
 ?>
 
@@ -45,38 +46,29 @@ require __DIR__ . '/../../header.php';
   </ol>
 </nav>
 
-<?php if (!$activeVisits): ?>
-  <div class="alert alert-info">
-    <i class="bi bi-info-circle me-1"></i>
-    Saat ini tidak ada kunjungan yang sedang berlangsung. Jaminan hanya dapat ditambahkan saat kunjungan aktif.
-    <a href="<?= e(url($AREA . '/kunjungan/tambah.php')) ?>">Buat kunjungan baru</a>.
+<?php if ($visitError !== ''): ?>
+  <div class="alert alert-warning">
+    <i class="bi bi-exclamation-circle me-1"></i><?= e($visitError) ?>
+    <a href="<?= e(url($AREA . '/kunjungan/aktif.php')) ?>">Lihat kunjungan aktif</a>.
   </div>
 <?php endif; ?>
 
 <div class="panel p-3 p-md-4" style="max-width:720px">
   <h2 class="h6 fw-bold text-navy mb-3"><i class="bi bi-box-seam me-2"></i>Catat Penerimaan Jaminan</h2>
 
+  <?php if ($visit && $visitError === ''): ?>
   <form method="post" action="<?= e(url('actions/jaminan_process.php')) ?>" enctype="multipart/form-data" novalidate>
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="tambah">
+    <input type="hidden" name="visit_id" value="<?= (int) $visit['id'] ?>">
 
     <div class="row g-3">
       <div class="col-12">
-        <label class="form-label small fw-semibold">Kunjungan <span class="text-danger">*</span></label>
-        <select name="visit_id" class="form-select" required>
-          <?php if ($selected): ?>
-            <option value="<?= (int) $selected['id'] ?>" selected>
-              <?= e($selected['kode_kunjungan']) ?> &middot; <?= e($selected['nama_tamu']) ?>
-            </option>
-          <?php else: ?>
-            <option value="">-- Pilih kunjungan aktif --</option>
-            <?php foreach ($activeVisits as $av): ?>
-              <option value="<?= (int) $av['id'] ?>">
-                <?= e($av['kode_kunjungan']) ?> &middot; <?= e($av['nama_tamu']) ?>
-              </option>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </select>
+        <div class="alert alert-light border mb-0">
+          <span class="small text-muted">Kunjungan</span><br>
+          <strong><?= e($visit['kode_kunjungan']) ?></strong>
+          <span class="text-muted">&middot; <?= e($visit['nama_tamu']) ?></span>
+        </div>
       </div>
       <div class="col-md-8">
         <label class="form-label small fw-semibold">Barang / Jaminan <span class="text-danger">*</span></label>
@@ -100,12 +92,15 @@ require __DIR__ . '/../../header.php';
     </div>
 
     <div class="mt-4 d-flex gap-2">
-      <button type="submit" class="btn btn-navy" <?= !$activeVisits ? 'disabled' : '' ?>>
+      <button type="submit" class="btn btn-navy">
         <i class="bi bi-check-lg me-1"></i>Simpan Jaminan
       </button>
-      <a href="<?= e(url($base . '/index.php')) ?>" class="btn btn-outline-secondary">Batal</a>
+      <a href="<?= e(url($AREA . '/kunjungan/detail.php?id=' . (int) $visit['id'])) ?>" class="btn btn-outline-secondary">Batal</a>
     </div>
   </form>
+  <?php else: ?>
+    <a href="<?= e(url($AREA . '/kunjungan/aktif.php')) ?>" class="btn btn-outline-secondary">Kembali</a>
+  <?php endif; ?>
 </div>
 
 <?php require __DIR__ . '/../../footer.php'; ?>

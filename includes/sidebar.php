@@ -2,6 +2,12 @@
 /**
  * includes/sidebar.php
  * Sidebar navigasi (responsif) - menu menyesuaikan role pengguna.
+ *
+ * Catatan revisi:
+ *  - Menu "Jaminan" tidak lagi berdiri sendiri; pengelolaan jaminan diintegrasikan
+ *    ke halaman Kunjungan Aktif + detail kunjungan (tautan "Semua Jaminan" tetap tersedia).
+ *  - Sidebar Petugas disusun ulang: Menu Utama > Layanan Tamu > Akun,
+ *    dengan "Tambah Kunjungan" berupa dropdown (input manual & pemindaian QR).
  */
 if (!defined('APP_FUNCTIONS_LOADED')) {
     exit('Akses langsung dilarang.');
@@ -13,41 +19,44 @@ $menu = [];
 if ($role === 'admin') {
     $menu = [
         ['label' => 'MENU UTAMA', 'items' => [
-            ['dashboard', 'bi-speedometer2', 'Dashboard', 'admin/dashboard.php'],
+            ['key' => 'dashboard', 'icon' => 'bi-speedometer2', 'label' => 'Dashboard', 'href' => 'admin/dashboard.php'],
         ]],
         ['label' => 'DATA MASTER', 'items' => [
-            ['tamu',       'bi-people',      'Data Tamu',        'admin/tamu/index.php'],
-            ['registrasi', 'bi-person-check','Tamu Terdaftar',   'admin/tamu/registrasi.php'],
-            ['mitra',      'bi-building',    'Perusahaan Mitra', 'admin/mitra/index.php'],
+            ['key' => 'tamu',       'icon' => 'bi-people',       'label' => 'Data Tamu',        'href' => 'admin/tamu/index.php'],
+            ['key' => 'registrasi', 'icon' => 'bi-person-check', 'label' => 'Tamu Terdaftar',   'href' => 'admin/tamu/registrasi.php'],
+            ['key' => 'mitra',      'icon' => 'bi-building',     'label' => 'Perusahaan Mitra', 'href' => 'admin/mitra/index.php'],
         ]],
         ['label' => 'KUNJUNGAN', 'items' => [
-            ['qr',       'bi-qr-code',   'QR Code',         'admin/qr/index.php'],
-            ['kunjungan','bi-door-open', 'Semua Kunjungan', 'admin/kunjungan/index.php'],
-            ['aktif',    'bi-hourglass-split', 'Kunjungan Aktif', 'admin/kunjungan/aktif.php'],
-            ['jaminan',  'bi-box-seam',  'Jaminan',         'admin/jaminan/index.php'],
+            ['key' => 'qr',        'icon' => 'bi-qr-code',           'label' => 'QR Code',         'href' => 'admin/qr/index.php'],
+            ['key' => 'kunjungan', 'icon' => 'bi-door-open',         'label' => 'Semua Kunjungan', 'href' => 'admin/kunjungan/index.php'],
+            ['key' => 'aktif',     'icon' => 'bi-hourglass-split',   'label' => 'Kunjungan Aktif', 'href' => 'admin/kunjungan/aktif.php'],
+            // Menu "Jaminan" terpisah DIHAPUS: seluruh fungsi (lihat, tambah,
+            // kembalikan, riwayat) diakses lewat Kunjungan Aktif & detail kunjungan.
         ]],
         ['label' => 'LAPORAN & SISTEM', 'items' => [
-            ['laporan',     'bi-file-earmark-bar-graph', 'Laporan',         'admin/laporan/index.php'],
-            ['users',       'bi-person-gear',            'Manajemen User',  'admin/users/index.php'],
-            ['aktivitas',   'bi-clock-history',          'Log Aktivitas',   'admin/aktivitas.php'],
-            ['pengaturan',  'bi-gear',                   'Pengaturan',      'admin/pengaturan.php'],
-            ['profil',      'bi-person-circle',          'Profil',          'admin/profil.php'],
+            ['key' => 'laporan',    'icon' => 'bi-file-earmark-bar-graph', 'label' => 'Laporan',        'href' => 'admin/laporan/index.php'],
+            ['key' => 'users',      'icon' => 'bi-person-gear',            'label' => 'Manajemen User', 'href' => 'admin/users/index.php'],
+            ['key' => 'aktivitas',  'icon' => 'bi-clock-history',          'label' => 'Log Aktivitas',  'href' => 'admin/aktivitas.php'],
+            ['key' => 'pengaturan', 'icon' => 'bi-gear',                   'label' => 'Pengaturan',     'href' => 'admin/pengaturan.php'],
+            ['key' => 'profil',     'icon' => 'bi-person-circle',          'label' => 'Profil',         'href' => 'admin/profil.php'],
         ]],
     ];
 } else {
     $menu = [
         ['label' => 'MENU UTAMA', 'items' => [
-            ['dashboard', 'bi-speedometer2', 'Dashboard', 'petugas/dashboard.php'],
+            ['key' => 'dashboard', 'icon' => 'bi-speedometer2', 'label' => 'Dashboard', 'href' => 'petugas/dashboard.php'],
         ]],
         ['label' => 'LAYANAN TAMU', 'items' => [
-            ['tamu',       'bi-people',      'Data Tamu',   'petugas/tamu/index.php'],
-            ['scanner',    'bi-qr-code-scan','Scan QR',     'petugas/qr/scanner.php'],
-            ['kunjungan',  'bi-door-open',   'Kunjungan',   'petugas/kunjungan/index.php'],
-            ['aktif',      'bi-hourglass-split', 'Kunjungan Aktif', 'petugas/kunjungan/aktif.php'],
-            ['jaminan',    'bi-box-seam',    'Jaminan',     'petugas/jaminan/index.php'],
+            ['key' => 'aktif', 'icon' => 'bi-hourglass-split', 'label' => 'Kunjungan Aktif', 'href' => 'petugas/kunjungan/aktif.php'],
+            ['key' => 'tambah_kunjungan', 'icon' => 'bi-plus-lg', 'label' => 'Tambah Kunjungan', 'children' => [
+                ['key' => 'tambah',  'icon' => 'bi-pencil-square', 'label' => 'Input Manual',   'href' => 'petugas/kunjungan/tambah.php'],
+                ['key' => 'scanner', 'icon' => 'bi-qr-code-scan',  'label' => 'Pindai QR Code', 'href' => 'petugas/qr/scanner.php'],
+            ]],
+            ['key' => 'kunjungan', 'icon' => 'bi-door-open', 'label' => 'Kunjungan', 'href' => 'petugas/kunjungan/index.php'],
+            ['key' => 'tamu',      'icon' => 'bi-people',    'label' => 'Data Tamu', 'href' => 'petugas/tamu/index.php'],
         ]],
         ['label' => 'AKUN', 'items' => [
-            ['profil', 'bi-person-circle', 'Profil', 'petugas/profil.php'],
+            ['key' => 'profil', 'icon' => 'bi-person-circle', 'label' => 'Profil', 'href' => 'petugas/profil.php'],
         ]],
     ];
 }
@@ -62,11 +71,40 @@ if ($role === 'admin') {
   <div class="sidebar-body p-2">
     <?php foreach ($menu as $group): ?>
       <div class="sidebar-heading px-3 pt-3 pb-1 text-uppercase"><?= e($group['label']) ?></div>
-      <?php foreach ($group['items'] as [$key, $icon, $label, $href]): ?>
-        <a class="sidebar-link<?= $active_menu === $key ? ' active' : '' ?>"
-           href="<?= e(url($href)) ?>">
-          <i class="bi <?= e($icon) ?> me-2"></i><?= e($label) ?>
-        </a>
+
+      <?php foreach ($group['items'] as $item): ?>
+        <?php if (!empty($item['children'])):
+            // Submenu dropdown (accordion - menekan konten, bukan menutupinya)
+            $subOpen = false;
+            foreach ($item['children'] as $child) {
+                if ($active_menu === $child['key']) {
+                    $subOpen = true;
+                    break;
+                }
+            }
+            $subId = 'submenu-' . $item['key'];
+        ?>
+          <details class="sidebar-menu" <?= $subOpen ? 'open' : '' ?>>
+            <summary class="sidebar-link<?= $subOpen ? ' active' : '' ?>" aria-controls="<?= e($subId) ?>">
+              <i class="bi <?= e($item['icon']) ?>"></i>
+              <span class="sidebar-label"><?= e($item['label']) ?></span>
+              <i class="bi bi-chevron-down sidebar-caret ms-auto"></i>
+            </summary>
+            <div class="sidebar-submenu" id="<?= e($subId) ?>">
+              <?php foreach ($item['children'] as $child): ?>
+                <a class="sidebar-link sidebar-sublink<?= $active_menu === $child['key'] ? ' active' : '' ?>"
+                   href="<?= e(url($child['href'])) ?>">
+                  <i class="bi <?= e($child['icon']) ?>"></i><span class="sidebar-label"><?= e($child['label']) ?></span>
+                </a>
+              <?php endforeach; ?>
+            </div>
+          </details>
+        <?php else: ?>
+          <a class="sidebar-link<?= $active_menu === $item['key'] ? ' active' : '' ?>"
+             href="<?= e(url($item['href'])) ?>">
+            <i class="bi <?= e($item['icon']) ?>"></i><span class="sidebar-label"><?= e($item['label']) ?></span>
+          </a>
+        <?php endif; ?>
       <?php endforeach; ?>
     <?php endforeach; ?>
   </div>

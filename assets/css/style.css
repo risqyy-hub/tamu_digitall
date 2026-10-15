@@ -239,6 +239,24 @@ a { transition: color var(--transition); }
   box-shadow: inset 3px 0 0 var(--cream), 0 4px 12px rgba(3, 12, 26, .30);
 }
 .sidebar-link.active i { color: var(--cream); }
+
+/* Dropdown sidebar (accordion <details>) - submenu menekan konten,
+   sehingga tidak menutupi elemen penting di bawahnya. */
+details.sidebar-menu > summary { list-style: none; cursor: pointer; }
+details.sidebar-menu > summary::-webkit-details-marker { display: none; }
+details.sidebar-menu > summary.sidebar-caret-marker { list-style: none; }
+.sidebar-caret {
+  font-size: .72rem;
+  transition: transform var(--transition);
+}
+details.sidebar-menu[open] > summary .sidebar-caret { transform: rotate(180deg); }
+.sidebar-submenu { margin-left: 4px; }
+.sidebar-sublink {
+  padding-left: 1.75rem;
+  font-size: .855rem;
+}
+.sidebar-sublink i { width: 16px; }
+
 .sidebar-body { overflow-y: auto; padding-bottom: 1rem; }
 .sidebar-body::-webkit-scrollbar { width: 6px; }
 .sidebar-body::-webkit-scrollbar-thumb { background: rgba(169, 184, 204, .28); border-radius: 3px; }

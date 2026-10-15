@@ -110,30 +110,46 @@ require __DIR__ . '/../../header.php';
 
   <!-- ============ Jaminan & check-out ============ -->
   <div class="col-lg-7">
-    <!-- Hasil kunjungan (diisi / diperbarui oleh petugas yang berwenang) -->
+    <!-- Hasil kunjungan (diisi sekali oleh petugas berwenang, lalu menjadi catatan final) -->
+    <?php $hasilAda = hasil_kunjungan_ada($visit['hasil_kunjungan'] ?? null); ?>
     <div class="panel p-3">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h2 class="h6 fw-bold text-navy mb-0"><i class="bi bi-journal-text me-2"></i>Hasil Kunjungan</h2>
-        <?php if (!hasil_kunjungan_ada($visit['hasil_kunjungan'] ?? null)): ?>
+        <?php if ($hasilAda): ?>
+          <span class="badge text-bg-success"><i class="bi bi-lock-fill me-1"></i>Hasil Kunjungan Tersimpan</span>
+        <?php else: ?>
           <span class="badge text-bg-light border small">Belum ada hasil</span>
         <?php endif; ?>
       </div>
-      <form method="post" action="<?= e(url('actions/kunjungan_process.php')) ?>">
-        <?= csrf_field() ?>
-        <input type="hidden" name="action" value="simpan_hasil">
-        <input type="hidden" name="id" value="<?= (int) $visit['id'] ?>">
-        <label class="form-label small fw-semibold" for="hasilKunjungan">Catatan Hasil</label>
-        <textarea name="hasil_kunjungan" id="hasilKunjungan" class="form-control" rows="4"
-                  maxlength="<?= (int) HASIL_KUNJUNGAN_MAX ?>"
-                  placeholder="Contoh: Perbaikan belum selesai karena alat belum lengkap, teknisi akan kembali besok."><?= e($visit['hasil_kunjungan'] ?? '') ?></textarea>
-        <div class="form-text">
-          Catat hasil pertemuan atau pekerjaan yang dilakukan. Bersifat opsional &mdash;
-          kunjungan yang masih berlangsung boleh belum memiliki hasil.
+
+      <?php if ($hasilAda): ?>
+        <div class="border rounded p-3 bg-light hasil-final">
+          <?= nl2br(e($visit['hasil_kunjungan'])) ?>
         </div>
-        <button type="submit" class="btn btn-navy btn-sm mt-2">
-          <i class="bi bi-save me-1"></i>Simpan Hasil
-        </button>
-      </form>
+        <div class="form-text mt-2">
+          <i class="bi bi-shield-lock me-1"></i>
+          Hasil kunjungan sudah tersimpan dan bersifat <b>final</b> - tidak dapat diubah lagi
+          melalui formulir maupun permintaan langsung ke server.
+        </div>
+      <?php else: ?>
+        <form method="post" action="<?= e(url('actions/kunjungan_process.php')) ?>">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="simpan_hasil">
+          <input type="hidden" name="id" value="<?= (int) $visit['id'] ?>">
+          <label class="form-label small fw-semibold" for="hasilKunjungan">Catatan Hasil</label>
+          <textarea name="hasil_kunjungan" id="hasilKunjungan" class="form-control" rows="4"
+                    maxlength="<?= (int) HASIL_KUNJUNGAN_MAX ?>"
+                    placeholder="Contoh: Perbaikan belum selesai karena alat belum lengkap, teknisi akan kembali besok."></textarea>
+          <div class="form-text">
+            Catat hasil pertemuan atau pekerjaan yang dilakukan. Bersifat opsional &mdash;
+            kunjungan yang masih berlangsung boleh belum memiliki hasil. Setelah disimpan,
+            hasil menjadi catatan final dan tidak dapat diubah lagi.
+          </div>
+          <button type="submit" class="btn btn-navy btn-sm mt-2">
+            <i class="bi bi-save me-1"></i>Simpan Hasil
+          </button>
+        </form>
+      <?php endif; ?>
     </div>
 
     <div class="panel mt-3">
@@ -221,17 +237,29 @@ require __DIR__ . '/../../header.php';
               <?= $aktifCount > 0 ? 'data-confirm="Masih ada jaminan aktif. Check-out akan ditolak server. Lanjutkan?"' : 'data-confirm="Selesaikan kunjungan ' . e($visit['kode_kunjungan']) . ' sekarang?"' ?>>
           <?= csrf_field() ?>
           <input type="hidden" name="id" value="<?= (int) $visit['id'] ?>">
-          <div class="mb-3">
-            <label class="form-label small fw-semibold" for="hasilCheckout">Hasil Kunjungan (opsional)</label>
-            <textarea name="hasil_kunjungan" id="hasilCheckout" class="form-control" rows="3"
-                      maxlength="<?= (int) HASIL_KUNJUNGAN_MAX ?>"
-                      placeholder="Contoh: Pembahasan selesai dan dokumen penawaran diminta untuk dilengkapi."><?= e($visit['hasil_kunjungan'] ?? '') ?></textarea>
-            <div class="form-text">
-              Disimpan bersama check-out. Boleh dikosongkan &mdash; catatan yang sudah ada
-              tidak akan berubah. Untuk menyimpan tanpa check-out, gunakan panel
-              <b>Hasil Kunjungan</b> di atas.
+          <?php if ($hasilAda): ?>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Hasil Kunjungan</label>
+              <div class="border rounded p-3 bg-light small hasil-final">
+                <?= nl2br(e($visit['hasil_kunjungan'])) ?>
+              </div>
+              <div class="form-text">
+                Hasil sudah tersimpan (final) dan <b>tidak akan berubah</b> saat check-out dijalankan.
+              </div>
             </div>
-          </div>
+          <?php else: ?>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold" for="hasilCheckout">Hasil Kunjungan (opsional)</label>
+              <textarea name="hasil_kunjungan" id="hasilCheckout" class="form-control" rows="3"
+                        maxlength="<?= (int) HASIL_KUNJUNGAN_MAX ?>"
+                        placeholder="Contoh: Pembahasan selesai dan dokumen penawaran diminta untuk dilengkapi."></textarea>
+              <div class="form-text">
+                Disimpan bersama check-out bila belum pernah diisi &mdash; catatan yang sudah ada
+                tidak akan berubah. Untuk menyimpan tanpa check-out, gunakan panel
+                <b>Hasil Kunjungan</b> di atas.
+              </div>
+            </div>
+          <?php endif; ?>
           <button type="submit" class="btn btn-navy" <?= $aktifCount > 0 ? 'disabled' : '' ?>>
             <i class="bi bi-box-arrow-right me-1"></i>Check-out Sekarang
           </button>
