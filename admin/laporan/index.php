@@ -73,6 +73,10 @@ require __DIR__ . '/../../includes/header.php';
     <button type="button" class="btn btn-navy btn-sm" onclick="window.print()">
       <i class="bi bi-printer me-1"></i>Cetak / Simpan PDF
     </button>
+    <a href="<?= e(url('admin/laporan/ekspor_excel.php' . ($qsFilter !== '' ? '?' . $qsFilter : ''))) ?>"
+       class="btn btn-success btn-sm">
+      <i class="bi bi-file-earmark-excel me-1"></i>Ekspor Excel
+    </a>
     <a href="<?= e(url('admin/laporan/ekspor_csv.php' . ($qsFilter !== '' ? '?' . $qsFilter : ''))) ?>"
        class="btn btn-outline-navy btn-sm">
       <i class="bi bi-file-earmark-spreadsheet me-1"></i>Ekspor CSV

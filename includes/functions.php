@@ -378,6 +378,93 @@ function send_csv(string $filename, array $header, array $rows): void
     exit;
 }
 
+/**
+ * Kirim file Excel (.xls berbasis XML-HTML Spreadsheet) dengan styling rapi,
+ * header instansi, proteksi formula injection, dan penegasan format teks (mso-number-format)
+ * agar angka panjang seperti NIK/No Identitas/Telepon tidak berubah jadi notasi ilmiah.
+ */
+function send_excel(string $filename, string $sheetTitle, array $headers, array $rows, array $meta = []): void
+{
+    while (ob_get_length() !== false && ob_get_length() > 0) {
+        ob_end_clean();
+    }
+    header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' . "\n";
+    echo '<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' . "\n";
+    echo '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>' . htmlspecialchars($sheetTitle, ENT_QUOTES, 'UTF-8') . '</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->' . "\n";
+    echo '<style>' . "\n";
+    echo 'body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; }' . "\n";
+    echo '.title { font-size: 14pt; font-weight: bold; color: #0b2a5b; }' . "\n";
+    echo '.meta { font-size: 10pt; color: #475569; }' . "\n";
+    echo 'table { border-collapse: collapse; }' . "\n";
+    echo 'th { background-color: #0b2a5b; color: #ffffff; font-weight: bold; border: 1px solid #1e3a8a; padding: 6px 10px; text-align: left; }' . "\n";
+    echo 'td { border: 1px solid #cbd5e1; padding: 5px 8px; vertical-align: top; }' . "\n";
+    echo '.text-center { text-align: center; }' . "\n";
+    echo '.text-right { text-align: right; }' . "\n";
+    echo '.str { mso-number-format: "\@"; }' . "\n";
+    echo '.num { mso-number-format: "#,##0"; text-align: right; }' . "\n";
+    echo '.status-selesai { background-color: #d1e7dd; color: #0f5132; font-weight: bold; text-align: center; }' . "\n";
+    echo '.status-berlangsung { background-color: #fff3cd; color: #664d03; font-weight: bold; text-align: center; }' . "\n";
+    echo '</style></head><body>' . "\n";
+
+    if (!empty($meta['instansi']) || !empty($meta['judul'])) {
+        $colspan = count($headers);
+        echo '<table>' . "\n";
+        if (!empty($meta['instansi'])) {
+            echo '<tr><td colspan="' . $colspan . '" class="title">' . htmlspecialchars((string) $meta['instansi'], ENT_QUOTES, 'UTF-8') . '</td></tr>' . "\n";
+        }
+        if (!empty($meta['judul'])) {
+            echo '<tr><td colspan="' . $colspan . '" style="font-weight:bold; font-size:12pt;">' . htmlspecialchars((string) $meta['judul'], ENT_QUOTES, 'UTF-8') . '</td></tr>' . "\n";
+        }
+        if (!empty($meta['periode'])) {
+            echo '<tr><td colspan="' . $colspan . '" class="meta">Periode: ' . htmlspecialchars((string) $meta['periode'], ENT_QUOTES, 'UTF-8') . '</td></tr>' . "\n";
+        }
+        if (!empty($meta['dicetak'])) {
+            echo '<tr><td colspan="' . $colspan . '" class="meta">Waktu Ekspor: ' . htmlspecialchars((string) $meta['dicetak'], ENT_QUOTES, 'UTF-8') . '</td></tr>' . "\n";
+        }
+        echo '<tr><td colspan="' . $colspan . '"></td></tr>' . "\n";
+        echo '</table>' . "\n";
+    }
+
+    echo '<table border="1">' . "\n";
+    echo '<thead><tr>' . "\n";
+    foreach ($headers as $h) {
+        echo '<th>' . htmlspecialchars((string) $h, ENT_QUOTES, 'UTF-8') . '</th>';
+    }
+    echo "\n</tr></thead>\n<tbody>\n";
+
+    foreach ($rows as $row) {
+        echo '<tr>' . "\n";
+        foreach ($row as $cell) {
+            $val = (string) $cell;
+            $class = 'str';
+            if (is_numeric($val) && strlen($val) < 10 && strpos($val, '0') !== 0) {
+                $class = 'num';
+            }
+            $valLower = strtolower(trim($val));
+            if ($valLower === 'selesai') {
+                $class = 'status-selesai';
+            } elseif ($valLower === 'berlangsung') {
+                $class = 'status-berlangsung';
+            } elseif ($val === 'Ya' || $val === 'Tidak') {
+                $class = 'text-center';
+            }
+            if ($val !== '' && in_array($val[0], ['=', '+', '-', '@'], true)) {
+                $val = "'" . $val;
+            }
+            echo '<td class="' . $class . '">' . htmlspecialchars($val, ENT_QUOTES, 'UTF-8') . '</td>';
+        }
+        echo "\n</tr>\n";
+    }
+    echo "</tbody></table></body></html>\n";
+    exit;
+}
+
+
 /* ============================================================
  *  PAGINATION
  * ============================================================ */

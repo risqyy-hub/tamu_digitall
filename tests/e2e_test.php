@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * tests/e2e_test.php  (CLI - hanya untuk pengujian lokal)
  * Uji alur end-to-end via HTTP terhadap aplikasi yang sedang berjalan di XAMPP.
@@ -322,11 +322,11 @@ $r = req("$BASE/actions/checkout_process.php", ['id' => (int) $visit2['id'], 'cs
 $v2 = db()->query("SELECT * FROM visits WHERE id = " . (int) $visit2['id'])->fetch();
 ok('check-out kunjungan tanpa jaminan BERHASIL', $v2['status'] === 'selesai');
 
-/* ---------- 13. Laporan & CSV ---------- */
-echo "13) Laporan, cetak & CSV\n";
+/* ---------- 13. Laporan, Cetak, CSV & Excel ---------- */
+echo "13) Laporan, cetak, CSV & Excel\n";
 $r = req("$BASE/admin/laporan/index.php", null, $sA, true);
-ok('halaman laporan terbuka dengan tombol cetak & CSV',
-    $r['status'] === 200 && strpos($r['body'], 'window.print()') !== false && strpos($r['body'], 'ekspor_csv.php') !== false);
+ok('halaman laporan terbuka dengan tombol cetak, CSV & Excel',
+    $r['status'] === 200 && strpos($r['body'], 'window.print()') !== false && strpos($r['body'], 'ekspor_csv.php') !== false && strpos($r['body'], 'ekspor_excel.php') !== false);
 ok('header laporan (judul, periode, waktu cetak) tersedia',
     strpos($r['body'], 'Dicetak:') !== false && strpos($r['body'], 'Periode:') !== false);
 
@@ -334,9 +334,14 @@ $r = req("$BASE/admin/laporan/ekspor_csv.php", null, $sA, true);
 ok('ekspor CSV memberi header unduhan', stripos($r['headers'], 'Content-Type: text/csv') !== false && stripos($r['headers'], 'attachment') !== false);
 ok('CSV berisi BOM UTF-8 & data kunjungan', strpos($r['body'], "\xEF\xBB\xBF") === 0 && strpos($r['body'], 'KT-') !== false);
 
+$r = req("$BASE/admin/laporan/ekspor_excel.php", null, $sA, true);
+ok('ekspor Excel memberi header unduhan .xls', stripos($r['headers'], 'application/vnd.ms-excel') !== false && stripos($r['headers'], 'attachment') !== false);
+ok('Excel berisi tabel & format mso-number-format', strpos($r['body'], 'mso-number-format') !== false && strpos($r['body'], 'Laporan Kunjungan') !== false);
+
 // filter status=selesai
 $r = req("$BASE/admin/laporan/ekspor_csv.php?status=selesai&dari=2000-01-01&sampai=2099-12-31", null, $sA, true);
 ok('filter CSV mengikuti parameter', strpos($r['body'], 'berlangsung') === false);
+
 
 /* ---------- 14. Aktivitas, pengaturan, profil ---------- */
 echo "14) Log, pengaturan, profil\n";
