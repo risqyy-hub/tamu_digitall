@@ -16,6 +16,9 @@ $active_menu = $active_menu ?? '';
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($page_title) ?> &middot; <?= e(setting('nama_instansi', APP_NAME)) ?></title>
+<link rel="icon" type="image/png" href="<?= e(asset('img/favicon.png')) ?>">
+<link rel="shortcut icon" href="<?= e(asset('img/favicon.ico')) ?>">
+<link rel="apple-touch-icon" href="<?= e(asset('img/logo.png')) ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" media="print" onload="this.media='all'"

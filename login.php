@@ -18,6 +18,9 @@ $page_title = 'Login';
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Login &middot; <?= e(setting('nama_instansi', APP_NAME)) ?></title>
+<link rel="icon" type="image/png" href="<?= e(asset('img/favicon.png')) ?>">
+<link rel="shortcut icon" href="<?= e(asset('img/favicon.ico')) ?>">
+<link rel="apple-touch-icon" href="<?= e(asset('img/logo.png')) ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" media="print" onload="this.media='all'"
@@ -31,8 +34,8 @@ $page_title = 'Login';
 <div class="card auth-card">
   <div class="card-body p-4 p-md-5">
     <div class="text-center mb-4">
-      <div class="auth-logo mx-auto mb-3">
-        <i class="bi bi-journal-bookmark-fill fs-2"></i>
+      <div class="auth-logo mx-auto mb-3 p-1 overflow-hidden">
+        <img src="<?= e(asset('img/logo.png')) ?>" alt="Logo" class="img-fluid rounded-3" style="width: 100%; height: 100%; object-fit: contain;">
       </div>
       <h1 class="h5 fw-bold text-navy mb-1">Buku Tamu Digital</h1>
       <p class="text-muted small mb-1"><?= e(setting('nama_instansi', APP_NAME)) ?></p>

@@ -35,7 +35,9 @@ try {
     <i class="bi bi-list"></i>
   </button>
   <span class="navbar-brand d-flex align-items-center gap-2 mb-0">
-    <span class="brand-tile"><i class="bi bi-journal-bookmark-fill"></i></span>
+    <span class="brand-tile overflow-hidden p-1">
+      <img src="<?= e(asset('img/logo.png')) ?>" alt="Logo" class="img-fluid rounded" style="width:100%;height:100%;object-fit:contain;">
+    </span>
     <span class="brand-text"><?= e(setting('nama_instansi', APP_NAME)) ?></span>
   </span>
 
